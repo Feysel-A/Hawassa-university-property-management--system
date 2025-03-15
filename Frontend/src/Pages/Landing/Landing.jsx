@@ -1,9 +1,12 @@
-import React from 'react'
+import Hero from "../../Components/Hero/Hero";
 
-function Landing() {
+
+const LandingPage = () => {
   return (
-    <div>Landing</div>
-  )
-}
+    <div style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
+      <Hero />
+    </div>
+  );
+};
 
-export default Landing
+export default LandingPage;
