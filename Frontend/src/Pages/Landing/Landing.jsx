@@ -1,7 +1,7 @@
 import React from "react";
 import "@coreui/coreui/dist/css/coreui.min.css";
 import Hero from "../../Components/Hero/Hero";
-import img from "../../assets/img/hero.png"
+import img from "../../assets/img/hero.png";
 const LandingPage = () => {
   return (
     <div
@@ -13,6 +13,7 @@ const LandingPage = () => {
         backgroundRepeat: "no-repeat",
         display: "flex",
         flexDirection: "column",
+        color: "white",
       }}
     >
       <Hero />

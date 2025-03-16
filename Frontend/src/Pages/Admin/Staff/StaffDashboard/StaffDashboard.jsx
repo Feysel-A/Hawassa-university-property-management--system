@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   CButton,
   CCard,
@@ -15,40 +15,36 @@ import {
   CAlert,
 } from '@coreui/react';
 import '@coreui/coreui/dist/css/coreui.min.css';
-import Sidebar from '../Sidebar/Sidebar';
+import Sidebar from '../../../../Components/Sidebar/Sidebar'; // Import the reusable Sidebar
 
 const StaffDashboard = () => {
-  // Mock data for available assets (replace with backend fetch later)
   const availableAssets = [
     { id: 1, name: 'Desktop PC', type: 'Fixed', status: 'Available' },
     { id: 2, name: 'Projector', type: 'Fixed', status: 'Available' },
     { id: 3, name: 'Printer Ink', type: 'Consumable', status: 'Available' },
   ];
 
-  // State for request feedback
-  const [requestMessage, setRequestMessage] = React.useState('');
+  const [requestMessage, setRequestMessage] = useState('');
 
-  // Handle request button click
   const handleRequest = (asset) => {
     const requestData = {
       assetId: asset.id,
       assetName: asset.name,
       assetType: asset.type,
-      quantity: 1, // Default for now
-      purpose: 'General use', // Default, editable in RequestAssets.js
-      requestDate: new Date().toISOString().split('T')[0], // Current date
-      staffId: 'STAFF001', // Placeholder from login
+      quantity: 1,
+      purpose: 'General use',
+      requestDate: new Date().toISOString().split('T')[0],
+      staffId: 'STAFF001',
     };
-    // Simulate backend request (replace with fetch/axios later)
     console.log('Requesting asset:', requestData);
     setRequestMessage(`Requested ${asset.name} successfully!`);
-    setTimeout(() => setRequestMessage(''), 3000); // Clear after 3s
+    setTimeout(() => setRequestMessage(''), 3000);
   };
 
   return (
     <div className="min-vh-100 d-flex">
-      {/* Sidebar */}
-      <Sidebar />
+      {/* Pass role="staff" to Sidebar */}
+      <Sidebar role="staff" />
 
       {/* Main Content */}
       <div className="flex-grow-1 bg-light">
@@ -60,14 +56,12 @@ const StaffDashboard = () => {
             </CCol>
           </CRow>
 
-          {/* Request Feedback */}
           {requestMessage && (
             <CAlert color="success" className="mb-4">
               {requestMessage}
             </CAlert>
           )}
 
-          {/* Available Assets */}
           <CRow className="mb-4">
             <CCol>
               <CCard>

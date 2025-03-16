@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   CButton,
   CCard,
@@ -12,21 +12,21 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
-} from '@coreui/react';
-import '@coreui/coreui/dist/css/coreui.min.css';
-import Sidebar from '../Sidebar/Sidebar';
+} from "@coreui/react";
+import "@coreui/coreui/dist/css/coreui.min.css";
+import Sidebar from "../../../../Components/Sidebar/Sidebar";
 
 const MyAssets = () => {
   // Mock data for my assets (replace with backend fetch later)
   const myAssets = [
-    { id: 4, name: 'Laptop', type: 'Fixed', issuedDate: '2025-03-01' },
-    { id: 5, name: 'Projector', type: 'Fixed', issuedDate: '2025-03-01' },
+    { id: 4, name: "Laptop", type: "Fixed", issuedDate: "2025-03-01" },
+    { id: 5, name: "Projector", type: "Fixed", issuedDate: "2025-03-01" },
   ];
 
   return (
     <div className="min-vh-100 d-flex">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar role="staff" />
 
       {/* Main Content */}
       <div className="flex-grow-1 bg-light">
@@ -34,7 +34,9 @@ const MyAssets = () => {
           <CRow>
             <CCol>
               <h1 className="mb-4">My Assets</h1>
-              <p className="text-muted">View and manage your issued assets here.</p>
+              <p className="text-muted">
+                View and manage your issued assets here.
+              </p>
             </CCol>
           </CRow>
 
@@ -62,9 +64,15 @@ const MyAssets = () => {
                           <CTableHeaderCell>{asset.id}</CTableHeaderCell>
                           <CTableHeaderCell>{asset.name}</CTableHeaderCell>
                           <CTableHeaderCell>{asset.type}</CTableHeaderCell>
-                          <CTableHeaderCell>{asset.issuedDate}</CTableHeaderCell>
                           <CTableHeaderCell>
-                            <CButton color="warning" size="sm" onClick={() => alert(`Returning ${asset.name}`)}>
+                            {asset.issuedDate}
+                          </CTableHeaderCell>
+                          <CTableHeaderCell>
+                            <CButton
+                              color="warning"
+                              size="sm"
+                              onClick={() => alert(`Returning ${asset.name}`)}
+                            >
                               Return
                             </CButton>
                           </CTableHeaderCell>

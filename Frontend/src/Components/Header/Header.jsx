@@ -1,7 +1,7 @@
 import React from "react";
 import { CButton, CContainer, CRow, CCol } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
-import logo from "../../assets/img/hu-logo.png";
+import logo from "../../assets/img/hu-logo-2.png";
 import "../../assets/css/LandingStyles.css";
 import { Link } from "react-router-dom";
 const Header = () => {

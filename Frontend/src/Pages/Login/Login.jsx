@@ -1,154 +1,156 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   CButton,
   CCard,
   CCardBody,
+  CCardHeader,
   CCol,
   CContainer,
   CForm,
   CFormInput,
   CFormSelect,
   CRow,
-  CAlert,
+  CFormFeedback,
 } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
-import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [selectedRole, setSelectedRole] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
-  // State for form inputs and errors
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-    role: "",
-  });
-  const [errors, setErrors] = useState({});
-  const [submitError, setSubmitError] = useState("");
 
-  // Handle input changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error for this field when user types
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+  // Email validation function
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Handle login button click with validation
+  const handleLogin = () => {
+    let isValid = true;
+
+    // Reset errors
+    setEmailError("");
+    setPasswordError("");
+
+    // Validate email
+    if (!email) {
+      setEmailError("Email is required");
+      isValid = false;
+    } else if (!validateEmail(email)) {
+      setEmailError("Please enter a valid email address");
+      isValid = false;
     }
-  };
 
-  // Validate form
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.username.trim()) newErrors.username = "Username is required";
-    if (!formData.password.trim()) newErrors.password = "Password is required";
-    if (!formData.role) newErrors.role = "Please select a role";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // True if no errors
-  };
+    // Validate password
+    if (!password) {
+      setPasswordError("Password is required");
+      isValid = false;
+    } else if (password.length < 6) {
+      setPasswordError("Password must be at least 6 characters");
+      isValid = false;
+    }
 
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSubmitError(""); // Clear previous submission error
+    // Validate role
+    if (!selectedRole) {
+      alert("Please select a role!");
+      isValid = false;
+    }
 
-    if (validateForm()) {
-      // Simulate backend call (replace with real API later)
-      const loginData = {
-        username: formData.username,
-        password: formData.password,
-        role: formData.role,
-      };
-      navigate("/dashboard/staff");
-      console.log("Submitting to backend:", loginData);
-
-      // Simulate success or failure (for demo purposes)
-      try {
-        // Replace this with actual fetch/axios call to backend
-        // e.g., await fetch('/api/login', { method: 'POST', body: JSON.stringify(loginData) });
-        console.log("Login successful (simulated)");
-        // Redirect or update UI here after real backend integration
-      } catch (error) {
-        setSubmitError("Login failed. Please check your credentials.");
+    // Navigate if valid
+    if (isValid) {
+      switch (selectedRole) {
+        case "staff":
+          navigate("/dashboard/staff", { state: { role: "staff" } });
+          break;
+        case "department_head":
+          navigate("/dashboard/department-head", {
+            state: { role: "department_head" },
+          });
+          break;
+        case "manager":
+          navigate("/dashboard/manager", { state: { role: "manager" } });
+          break;
+        default:
+          navigate("/login");
       }
     }
   };
 
   return (
-    <div className="min-vh-100 d-flex flex-row align-items-center bg-light">
+    <div className="min-vh-100 d-flex align-items-center bg-light">
       <CContainer>
         <CRow className="justify-content-center">
-          <CCol md="6">
-            <CCard className="p-4">
-              <CCardBody>
-                <CForm onSubmit={handleSubmit}>
-                  <h1 className="mb-4 text-center">Login to HUPMS</h1>
-                  <p className="text-muted text-center mb-4">
-                    Sign in to manage university property
-                  </p>
-
-                  {/* Username */}
-                  <CFormInput
-                    type="text"
-                    name="username"
-                    placeholder="Username"
-                    className="mb-3"
-                    value={formData.username}
-                    onChange={handleChange}
-                    autoComplete="username"
-                    invalid={!!errors.username}
-                    feedbackInvalid={errors.username}
-                  />
-
-                  {/* Password */}
-                  <CFormInput
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    className="mb-3"
-                    value={formData.password}
-                    onChange={handleChange}
-                    autoComplete="current-password"
-                    invalid={!!errors.password}
-                    feedbackInvalid={errors.password}
-                  />
-
-                  {/* Role */}
-                  <CFormSelect
-                    name="role"
-                    className="mb-4"
-                    value={formData.role}
-                    onChange={handleChange}
-                    aria-label="Select Role"
-                    invalid={!!errors.role}
-                    feedbackInvalid={errors.role}
+          <CCol md={8} lg={6}>
+            {" "}
+            {/* Increased width */}
+            <CCard className="shadow-lg">
+              <CCardHeader
+                className="text-white text-center py-4"
+                style={{ backgroundColor: "#2D6CA2" }}
+              >
+                <h2 className="mb-0" style={{ fontSize: "1.5rem" }}>
+                  Login
+                </h2>
+              </CCardHeader>
+              <CCardBody className="p-5">
+                {" "}
+                {/* More padding */}
+                <CForm>
+                  <div className="mb-4">
+                    <CFormInput
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      invalid={!!emailError}
+                      className="py-2"
+                      size="lg" // Larger input
+                    />
+                    {emailError && (
+                      <CFormFeedback invalid>{emailError}</CFormFeedback>
+                    )}
+                  </div>
+                  <div className="mb-4">
+                    <CFormInput
+                      type="password"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      invalid={!!passwordError}
+                      className="py-2"
+                      size="lg" // Larger input
+                    />
+                    {passwordError && (
+                      <CFormFeedback invalid>{passwordError}</CFormFeedback>
+                    )}
+                  </div>
+                  <div className="mb-4">
+                    <CFormSelect
+                      value={selectedRole}
+                      onChange={(e) => setSelectedRole(e.target.value)}
+                      aria-label="Select Role"
+                      className="py-2"
+                      size="lg" // Larger dropdown
+                    >
+                      <option value="">Select a Role</option>
+                      <option value="staff">Staff</option>
+                      <option value="department_head">Department Head</option>
+                      <option value="manager">Manager</option>
+                    </CFormSelect>
+                  </div>
+                  <CButton
+                    color="primary"
+                    onClick={handleLogin}
+                    className="w-100 py-3" // Full-width, taller button
+                    size="lg" // Larger button
                   >
-                    <option value="">Select Your Role</option>
-                    <option value="staff">Staff</option>
-                    <option value="department_head">Department Head</option>
-                    <option value="property_manager">Property Manager</option>
-                    <option value="store_keeper">Store Keeper</option>
-                    <option value="control_room">Control Room</option>
-                  </CFormSelect>
-
-                  {/* Submission Error */}
-                  {submitError && (
-                    <CAlert color="danger" className="mb-4">
-                      {submitError}
-                    </CAlert>
-                  )}
-
-                  {/* Buttons */}
-                  <CRow>
-                    <CCol xs="6">
-                      <CButton color="primary" className="px-4" type="submit">
-                        Login
-                      </CButton>
-                    </CCol>
-                    <CCol xs="6" className="text-right">
-                      <CButton color="link" className="px-0">
-                        Forgot Password?
-                      </CButton>
-                    </CCol>
-                  </CRow>
+                    Login
+                  </CButton>
                 </CForm>
               </CCardBody>
             </CCard>

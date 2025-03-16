@@ -4,10 +4,11 @@ import Landing from "./Pages/Landing/Landing";
 import Login from "./Pages/Login/Login";
 import Header from "./Components/Header/Header";
 import Footer from "./Components/Footer/Footer";
-import StaffDashboard from "./Components/Admin/Staff/StaffDashboard/StaffDashboard";
-import MyAssets from "./Components/Admin/Staff/MyAssets/MyAssets";
-import RequestAssets from "./Components/Admin/Staff/RequestAssets/RequestAssets";
-
+import StaffDashboard from "./Pages/Admin/Staff/StaffDashboard/StaffDashboard";
+import MyAssets from "./Pages/Admin/Staff/MyAssets/MyAssets";
+import RequestAssets from "./Pages/Admin/Staff/RequestAssets/RequestAssets";
+import ManagerDashboard from "./Pages/Admin/Manager/Dashboard/ManagerDashboard";
+import DepartmentHeadDashboard from "./Pages/Admin/Department/Dashboard/DepartmentHeadDashboard";
 function Router() {
   return (
     <>
@@ -22,6 +23,11 @@ function Router() {
           path="/dashboard/staff/request"
           element={<RequestAssets />}
         />{" "}
+        <Route
+          path="/dashboard/department-head"
+          element={<DepartmentHeadDashboard />}
+        />
+        <Route path="/dashboard/manager" element={<ManagerDashboard />} />
         {/* Temp redirect */}
       </Routes>
       <Footer />

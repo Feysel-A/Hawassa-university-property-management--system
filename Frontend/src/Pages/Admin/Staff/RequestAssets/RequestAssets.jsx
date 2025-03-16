@@ -14,7 +14,7 @@ import {
   CAlert,
 } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
-import Sidebar from "../Sidebar/Sidebar";
+import Sidebar from "../../../../Components/Sidebar/Sidebar";
 
 const RequestAssets = () => {
   // Form state
@@ -73,7 +73,7 @@ const RequestAssets = () => {
   return (
     <div className="min-vh-100 d-flex">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar role="staff"/>
 
       {/* Main Content */}
       <div className="flex-grow-1 bg-light">
