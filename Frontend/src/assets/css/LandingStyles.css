@@ -1,68 +1,91 @@
 /* Landing Page Wrapper */
 .landing-wrapper {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Header Styles */
-  .header-section {
-    padding: 20px;
-    background-color: #fff; /* White instead of light green */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .header-title {
-    margin: 0;
-    color: #2c3e50;
-  }
-  .header-logo{
-    height: 50px;
-  }
-  /* Hero Styles */
-  .hero-section {
-    display: flex; /* Side-by-side layout */
-    flex: 1; /* Expands to fill available space */
-    min-height: 500px; /* Ensures enough height */
-  }
-  
-  .hero-text {
-    flex: 1; /* Takes half the width */
-    padding: 50px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background-color: #f8f9fa; /* Light gray for contrast */
-  }
-  
-  .hero-text h1 {
-    font-size: 2.5rem;
-    color: #2c3e50;
-  }
-  
-  .hero-text p {
-    font-size: 1.2rem;
-    color: #666;
-    margin: 20px 0;
-  }
-  
-  .hero-image {
-    flex: 1; /* Takes half the width */
-    background-image: url('../img//hero.png'); /* Public folder path */
-    background-size: cover; /* Covers the right side */
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-  
-  /* Footer Styles */
-  .footer-section {
-    padding: 20px;
-    text-align: center;
-    background-color: #fff; /* White instead of light green */
-    border-top: 2px solid #ddd; /* Neutral gray line */
-  }
-  
-  .footer-section p {
-    margin: 0;
-    color: #666;
-  }
+  min-height: 100vh;
+  background-image: url("../img/hero.png"); /* Full-body background */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Overlay for readability */
+.landing-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
+  z-index: 1;
+}
+
+/* Header Styles */
+.header-section {
+  padding: 20px;
+  background-color: #2d6ca2; /* Green gradient */
+  color: #fff; /* White text/buttons for contrast */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  position: relative;
+  z-index: 2;
+}
+
+.header-title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #fff; /* White for contrast */
+}
+
+.header-logo {
+  margin-top: -5px;
+  height: 50px;
+}
+
+/* Button Styles */
+.btn-primary {
+  background-color: #4caf50; /* Green */
+  border-color: #4caf50; /* Green */
+  color: #fff; /* White for contrast */
+}
+
+/* Hero Styles */
+.hero-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-content h1 {
+  font-size: 2.5rem;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  color: #fff;
+  margin-bottom: 30px;
+}
+
+/* Footer Styles */
+.footer-section {
+  padding: 20px;
+  background: linear-gradient(to right, #2d6ca2, #2D6CA2); /* Matching green gradient */
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2); /* Shadow upwards */
+  position: relative;
+  z-index: 2;
+}
+
+.footer-section p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #fff; /* White for contrast */
+}
