@@ -24,7 +24,7 @@
 /* Header Styles */
 .header-section {
   padding: 20px;
-  background-color: #2d6ca2; /* Green gradient */
+  background-color: #08194a; /* Green gradient */
   color: #fff; /* White text/buttons for contrast */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
   position: relative;
@@ -45,11 +45,15 @@
 
 /* Button Styles */
 .btn-primary {
-  background-color: #4caf50; /* Green */
-  border-color: #4caf50; /* Green */
+  background-color: #f93411; /* Green */
+  border-color: #ec1a1a; /* Green */
   color: #fff; /* White for contrast */
 }
-
+.btn-primary:hover {
+  background-color: #f90000; /* Green */
+  border-color: #ec1a1a; /* Green */
+  color: #fff; /* White for contrast */
+}
 /* Hero Styles */
 .hero-section {
   flex: 1;
@@ -76,7 +80,11 @@
 /* Footer Styles */
 .footer-section {
   padding: 20px;
-  background: linear-gradient(to right, #2d6ca2, #2D6CA2); /* Matching green gradient */
+  background: linear-gradient(
+    to right,
+    #08194A,
+    #081920
+  ); /* Matching green gradient */
   color: #fff;
   text-align: center;
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2); /* Shadow upwards */

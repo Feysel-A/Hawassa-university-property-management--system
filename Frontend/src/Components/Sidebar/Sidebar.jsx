@@ -38,7 +38,7 @@ const Sidebar = ({ role, visible, overlaid }) => {
       visible={visible}
       overlaid={overlaid}
       style={{
-        backgroundColor: "#2D6CA2",
+        backgroundColor: "#08194a",
         width: "200px", // Fixed width (narrower than default ~250px)
         boxShadow: "2px 0 5px rgba(0,0,0,0.1)", // Subtle shadow
         display: "flex",

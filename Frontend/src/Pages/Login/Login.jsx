@@ -91,9 +91,12 @@ const LoginPage = () => {
             <CCard className="shadow-lg">
               <CCardHeader
                 className="text-white text-center py-4"
-                style={{ backgroundColor: "#2D6CA2" }}
+                style={{ backgroundColor: "#08194A" }}
               >
-                <h2 className="mb-0" style={{ fontSize: "1.5rem" }}>
+                <h2
+                  className="mb-0"
+                  style={{ fontSize: "1.5rem", color: "white" }}
+                >
                   Login
                 </h2>
               </CCardHeader>
