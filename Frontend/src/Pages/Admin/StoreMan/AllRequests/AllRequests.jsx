@@ -25,7 +25,9 @@ const StoremanHandledRequests = () => {
 
   const fetchHandled = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/requests/storeman/handled");
+      const res = await axios.get(
+        "http://localhost:5000/api/requests/storeman/handled"
+      );
       setRequests(res.data);
     } catch (error) {
       console.error("Error fetching handled requests:", error);
@@ -46,7 +48,9 @@ const StoremanHandledRequests = () => {
           <CRow>
             <CCol>
               <h1 className="mb-4">Handled Requests</h1>
-              <p className="text-muted">View all accepted or rejected asset deliveries by users.</p>
+              <p className="text-muted">
+                View all accepted or rejected asset deliveries by users.
+              </p>
             </CCol>
           </CRow>
 
@@ -88,10 +92,14 @@ const StoremanHandledRequests = () => {
                               <CTableDataCell>
                                 <strong
                                   className={
-                                    req.status === "Accepted" ? "text-success" : "text-danger"
+                                    req.status === "Accepted"
+                                      ? "text-success"
+                                      : "text-danger"
                                   }
                                 >
-                                  {req.status}
+                                  {req.status === "Accepted"
+                                    ? "Accepted"
+                                    : "Rejected"}
                                 </strong>
                               </CTableDataCell>
                               <CTableDataCell>
@@ -101,7 +109,10 @@ const StoremanHandledRequests = () => {
                           ))
                         ) : (
                           <CTableRow>
-                            <CTableDataCell colSpan="7" className="text-center text-muted">
+                            <CTableDataCell
+                              colSpan="7"
+                              className="text-center text-muted"
+                            >
                               No accepted or rejected requests yet.
                             </CTableDataCell>
                           </CTableRow>

@@ -54,7 +54,7 @@ const Sidebar = ({ role, visible, overlaid }) => {
     },
     {
       to: "/dashboard/department-head/pending-requests",
-      label: "Pending Requests",
+      label: "My Requests",
       icon: cilList,
     },
     {

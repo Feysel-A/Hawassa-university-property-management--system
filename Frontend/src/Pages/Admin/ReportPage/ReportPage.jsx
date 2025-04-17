@@ -51,7 +51,7 @@ const ReportsPage = () => {
 
   return (
     <div className="d-flex min-vh-100">
-      <Sidebar role="manager" />
+      <Sidebar role="admin" />
       <CContainer className="py-4 flex-grow-1">
         <CCard>
           <CCardHeader

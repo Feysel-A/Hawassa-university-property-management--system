@@ -39,7 +39,7 @@ const AdminDashboard = () => {
         <CContainer className="py-4">
           <CRow>
             <CCol>
-              <h1 className="mb-4">Admin Dashboard</h1>
+              <h1 className="mb-4 text-center">Admin Dashboard</h1>
               <p className="text-muted">
                 Welcome, Admin! Here's an overview of key system metrics.
               </p>

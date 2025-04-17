@@ -106,7 +106,7 @@ const UserList = () => {
       <CContainer className="py-4 flex-grow-1">
         <CCard>
           <CCardHeader className="bg-dark text-white">
-            <h4>User Management</h4>
+            <h3 className="text-center text-white">User Management</h3>
           </CCardHeader>
           <CCardBody>
             <div className="d-flex justify-content-between mb-3">

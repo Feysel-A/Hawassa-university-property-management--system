@@ -9,7 +9,6 @@ import {
   CForm,
   CFormInput,
   CFormSelect,
-  CFormTextarea,
   CRow,
   CAlert,
 } from "@coreui/react";
@@ -19,12 +18,12 @@ import Sidebar from "../../../../Components/Sidebar/Sidebar";
 const RegisterAsset = () => {
   const [formData, setFormData] = useState({
     name: "",
-    modelName: "",
+    model_name: "",
     code: "",
     type: "",
     quantity: "",
     cost: "",
-    description: "",
+    department_id: 1,
   });
 
   const [errors, setErrors] = useState({});
@@ -56,7 +55,7 @@ const RegisterAsset = () => {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch("http://localhost:5000/api/assets/register", {
+      const response = await fetch("http://localhost:5000/api/assets/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -66,12 +65,12 @@ const RegisterAsset = () => {
         setSubmitMessage("Asset registered successfully!");
         setFormData({
           name: "",
-          modelName: "",
+          model_name: "",
           code: "",
           type: "",
           quantity: "",
           cost: "",
-          description: "",
+          department_id: 1,
         });
       } else {
         const data = await response.json();
@@ -86,7 +85,7 @@ const RegisterAsset = () => {
   return (
     <div className="min-vh-100 d-flex">
       <Sidebar role="manager" />
-  
+
       {/* Centered Main Content */}
       <div className="flex-grow-1 bg-light d-flex justify-content-center align-items-center">
         <CContainer className="py-5">
@@ -97,10 +96,15 @@ const RegisterAsset = () => {
                   {submitMessage}
                 </CAlert>
               )}
-  
+
               <CCard className="shadow-sm">
-                <CCardHeader className="text-white" style={{ backgroundColor: "#08194a" }}>
-                  <h4 className="mb-0 text-center text-white">Asset Registration Form</h4>
+                <CCardHeader
+                  className="text-white"
+                  style={{ backgroundColor: "#08194a" }}
+                >
+                  <h4 className="mb-0 text-center text-white">
+                    Asset Registration Form
+                  </h4>
                 </CCardHeader>
                 <CCardBody>
                   <CForm onSubmit={handleSubmit}>
@@ -114,9 +118,9 @@ const RegisterAsset = () => {
                       className="mb-3"
                     />
                     <CFormInput
-                      name="modelName"
+                      name="model_name"
                       label="Model Name"
-                      value={formData.modelName}
+                      value={formData.model_name}
                       onChange={handleChange}
                       className="mb-3"
                     />
@@ -164,14 +168,7 @@ const RegisterAsset = () => {
                       min="1"
                       className="mb-3"
                     />
-                    <CFormTextarea
-                      name="description"
-                      label="Description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      rows={3}
-                      className="mb-4"
-                    />
+
                     <div className="text-center">
                       <CButton type="submit" color="primary">
                         Register Asset
@@ -186,7 +183,6 @@ const RegisterAsset = () => {
       </div>
     </div>
   );
-  
 };
 
 export default RegisterAsset;

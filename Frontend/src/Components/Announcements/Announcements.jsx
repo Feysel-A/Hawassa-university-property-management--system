@@ -2,11 +2,11 @@ import React, { useState } from "react";
 
 const Announcements = () => {
   const [visible, setVisible] = useState(true);
-  
+
   const announcements = [
     "New office chairs added to inventory!",
     "Laptops are now available for department allocation.",
-    "Reminder: Return unused assets before the semester ends."
+    "Reminder: Return unused assets before the semester ends.",
   ];
 
   if (!visible) return null; // Do not render if not visible
@@ -21,7 +21,7 @@ const Announcements = () => {
         margin: "20px auto",
         position: "relative",
         color: "white",
-        fontSize: "1.2em"
+        fontSize: "1.2em",
       }}
     >
       <button
@@ -34,12 +34,13 @@ const Announcements = () => {
           border: "none",
           color: "white",
           fontSize: "1.5em",
-          cursor: "pointer"
+          cursor: "pointer",
         }}
       >
         &times;
       </button>
-      <h2>Latest Announcements</h2>
+      <h2 style={{ marginBottom: "-10px" }}>Latest Announcements</h2>
+      <hr style={{ color: "white", marginBottom: "10px", fontWeight: "900" }} />
       <ul>
         {announcements.map((announcement, index) => (
           <li key={index} style={{ marginBottom: "10px" }}>

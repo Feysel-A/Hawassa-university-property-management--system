@@ -13,122 +13,131 @@ import {
   CTableRow,
   CBadge,
   CAlert,
+  CButton,
+  CTableDataCell,
+  CSpinner,
 } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
 import Sidebar from "../../../../Components/Sidebar/Sidebar";
+import axios from "axios";
 
 const AvailableAssets = () => {
   const [assets, setAssets] = useState([]);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
+  // Fetch real assets
+  const fetchAssets = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/assets");
+      setAssets(res.data);
+    } catch (err) {
+      setError("Failed to load assets.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Later you will replace this with fetch/axios call
-    const fetchAssets = async () => {
-      try {
-        // Simulated fetch (replace this with API call)
-        const mockAssets = [
-          {
-            id: 1,
-            name: "Desktop PC",
-            modelName: "Dell OptiPlex 7070",
-            type: "Fixed",
-            code: "PC-001",
-            quantity: 10,
-            cost: 1200.0,
-            status: "Active",
-          },
-          {
-            id: 2,
-            name: "Printer Ink",
-            modelName: "HP 61XL",
-            type: "Consumable",
-            code: "INK-002",
-            quantity: 50,
-            cost: 20.5,
-            status: "Active",
-          },
-          {
-            id: 3,
-            name: "Old Projector",
-            modelName: "Epson X1",
-            type: "Fixed",
-            code: "PROJ-003",
-            quantity: 0,
-            cost: 600,
-            status: "Removed",
-          },
-        ];
-
-        setAssets(mockAssets);
-      } catch (err) {
-        setError("Failed to load assets.");
-      }
-    };
-
     fetchAssets();
   }, []);
+
+  const handleDisposal = async (id) => {
+    try {
+      await axios.put(`http://localhost:5000/api/assets/${id}`, {
+        status: "Removed",
+      });
+      setMessage("Asset marked as removed successfully.");
+      fetchAssets(); // Refresh
+      setTimeout(() => setMessage(""), 3000);
+    } catch (err) {
+      setMessage("Disposal failed.");
+    }
+  };
 
   return (
     <div className="min-vh-100 d-flex">
       <Sidebar role="manager" />
       <div className="flex-grow-1 bg-light">
         <CContainer className="py-4">
-         
+          <CRow>
+            <CCol>
+              <h2 className="mb-4">Manage Assets</h2>
+              {message && <CAlert color="info">{message}</CAlert>}
+              {error && <CAlert color="danger">{error}</CAlert>}
+            </CCol>
+          </CRow>
 
-          {error && <CAlert color="danger">{error}</CAlert>}
-
-          <CCard className="shadow-sm">
-            <CCardHeader
-              className=" text-white"
-              style={{ backgroundColor: "#08194a" }}
-            >
-              <h3 style={{ color: "white", textAlign: "center" }}>
-                Assets List
-              </h3>
-            </CCardHeader>
-            <CCardBody>
-              <CTable responsive hover>
-                <CTableHead>
-                  <CTableRow>
-                    <CTableHeaderCell>ID</CTableHeaderCell>
-                    <CTableHeaderCell>Name</CTableHeaderCell>
-                    <CTableHeaderCell>Model</CTableHeaderCell>
-                    <CTableHeaderCell>Type</CTableHeaderCell>
-                    <CTableHeaderCell>Code</CTableHeaderCell>
-                    <CTableHeaderCell>Quantity</CTableHeaderCell>
-                    <CTableHeaderCell>Cost</CTableHeaderCell>
-                    <CTableHeaderCell>Status</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                  {assets.map((asset) => (
-                    <CTableRow key={asset.id}>
-                      <CTableHeaderCell>{asset.id}</CTableHeaderCell>
-                      <CTableHeaderCell>{asset.name}</CTableHeaderCell>
-                      <CTableHeaderCell>{asset.modelName}</CTableHeaderCell>
-                      <CTableHeaderCell>{asset.type}</CTableHeaderCell>
-                      <CTableHeaderCell>{asset.code}</CTableHeaderCell>
-                      <CTableHeaderCell>{asset.quantity}</CTableHeaderCell>
-                      <CTableHeaderCell>${asset.cost}</CTableHeaderCell>
-                      <CTableHeaderCell>
-                        <CBadge
-                          color={
-                            asset.status === "Active"
-                              ? "success"
-                              : asset.status === "Removed"
-                              ? "danger"
-                              : "secondary"
-                          }
-                        >
-                          {asset.status}
-                        </CBadge>
-                      </CTableHeaderCell>
+          {loading ? (
+            <div className="text-center py-5">
+              <CSpinner color="primary" />
+              <p>Loading assets...</p>
+            </div>
+          ) : (
+            <CCard className="shadow-sm">
+              <CCardHeader
+                className="text-white"
+                style={{ backgroundColor: "#08194a" }}
+              >
+                <h4 className="text-center mb-0 text-white">Assets List</h4>
+              </CCardHeader>
+              <CCardBody>
+                <CTable responsive hover>
+                  <CTableHead>
+                    <CTableRow>
+                      <CTableHeaderCell>ID</CTableHeaderCell>
+                      <CTableHeaderCell>Name</CTableHeaderCell>
+                      <CTableHeaderCell>Model</CTableHeaderCell>
+                      <CTableHeaderCell>Type</CTableHeaderCell>
+                      <CTableHeaderCell>Code</CTableHeaderCell>
+                      <CTableHeaderCell>Quantity</CTableHeaderCell>
+                      <CTableHeaderCell>Cost</CTableHeaderCell>
+                      <CTableHeaderCell>Status</CTableHeaderCell>
+                      <CTableHeaderCell>Action</CTableHeaderCell>
                     </CTableRow>
-                  ))}
-                </CTableBody>
-              </CTable>
-            </CCardBody>
-          </CCard>
+                  </CTableHead>
+                  <CTableBody>
+                    {assets.map((asset) => (
+                      <CTableRow key={asset.id}>
+                        <CTableHeaderCell>{asset.id}</CTableHeaderCell>
+                        <CTableDataCell>{asset.name}</CTableDataCell>
+                        <CTableDataCell>{asset.model_name}</CTableDataCell>
+                        <CTableDataCell>{asset.type}</CTableDataCell>
+                        <CTableDataCell>{asset.code}</CTableDataCell>
+                        <CTableDataCell>{asset.quantity}</CTableDataCell>
+                        <CTableDataCell>${asset.cost}</CTableDataCell>
+                        <CTableDataCell>
+                          <CBadge
+                            color={
+                              asset.status === "Active"
+                                ? "success"
+                                : asset.status === "Removed"
+                                ? "danger"
+                                : "secondary"
+                            }
+                          >
+                            {asset.status}
+                          </CBadge>
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          {asset.status !== "Removed" && (
+                            <CButton
+                              color="danger"
+                              size="sm"
+                              onClick={() => handleDisposal(asset.id)}
+                            >
+                              Dispose
+                            </CButton>
+                          )}
+                        </CTableDataCell>
+                      </CTableRow>
+                    ))}
+                  </CTableBody>
+                </CTable>
+              </CCardBody>
+            </CCard>
+          )}
         </CContainer>
       </div>
     </div>
