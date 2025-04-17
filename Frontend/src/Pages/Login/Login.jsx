@@ -9,35 +9,30 @@ import {
   CContainer,
   CForm,
   CFormInput,
-  CFormSelect,
-  CRow,
   CFormFeedback,
+  CRow,
 } from "@coreui/react";
+import axios from "axios";
 import "@coreui/coreui/dist/css/coreui.min.css";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [serverError, setServerError] = useState("");
+
   const navigate = useNavigate();
 
-  // Email validation function
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  // Handle login button click with validation
-  const handleLogin = () => {
-    let isValid = true;
-
-    // Reset errors
+  const handleLogin = async () => {
     setEmailError("");
     setPasswordError("");
+    setServerError("");
 
-    // Validate email
+    let isValid = true;
+
     if (!email) {
       setEmailError("Email is required");
       isValid = false;
@@ -46,38 +41,48 @@ const LoginPage = () => {
       isValid = false;
     }
 
-    // Validate password
     if (!password) {
       setPasswordError("Password is required");
       isValid = false;
-    } else if (password.length < 6) {
-      setPasswordError("Password must be at least 6 characters");
-      isValid = false;
     }
 
-    // Validate role
-    if (!selectedRole) {
-      alert("Please select a role!");
-      isValid = false;
-    }
+    if (!isValid) return;
 
-    // Navigate if valid
-    if (isValid) {
-      switch (selectedRole) {
-        case "staff":
-          navigate("/dashboard/staff", { state: { role: "staff" } });
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        {
+          username: email,
+          password: password,
+        }
+      );
+
+      const { token, user } = response.data;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // Redirect based on user role
+      switch (user.role) {
+        case "Admin":
+          navigate("/dashboard/admin");
           break;
-        case "department_head":
-          navigate("/dashboard/department-head", {
-            state: { role: "department_head" },
-          });
+        case "DepartmentHead":
+          navigate("/dashboard/department-head");
           break;
-        case "manager":
-          navigate("/dashboard/manager", { state: { role: "manager" } });
+        case "StockManager":
+          navigate("/dashboard/manager");
+          break;
+        case "StoreMan":
+          navigate("/dashboard/storeman");
           break;
         default:
-          navigate("/login");
+          navigate("/dashboard/staff");
       }
+    } catch (error) {
+      const message =
+        error.response?.data?.error || "Login failed. Please try again.";
+      setServerError(message);
     }
   };
 
@@ -86,23 +91,14 @@ const LoginPage = () => {
       <CContainer>
         <CRow className="justify-content-center">
           <CCol md={8} lg={6}>
-            {" "}
-            {/* Increased width */}
             <CCard className="shadow-lg">
               <CCardHeader
                 className="text-white text-center py-4"
                 style={{ backgroundColor: "#08194A" }}
               >
-                <h2
-                  className="mb-0"
-                  style={{ fontSize: "1.5rem", color: "white" }}
-                >
-                  Login
-                </h2>
+                <h2 style={{ fontSize: "2rem", color: "white" }}>Login</h2>
               </CCardHeader>
               <CCardBody className="p-5">
-                {" "}
-                {/* More padding */}
                 <CForm>
                   <div className="mb-4">
                     <CFormInput
@@ -112,7 +108,7 @@ const LoginPage = () => {
                       onChange={(e) => setEmail(e.target.value)}
                       invalid={!!emailError}
                       className="py-2"
-                      size="lg" // Larger input
+                      size="lg"
                     />
                     {emailError && (
                       <CFormFeedback invalid>{emailError}</CFormFeedback>
@@ -126,31 +122,33 @@ const LoginPage = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       invalid={!!passwordError}
                       className="py-2"
-                      size="lg" // Larger input
+                      size="lg"
                     />
                     {passwordError && (
                       <CFormFeedback invalid>{passwordError}</CFormFeedback>
                     )}
                   </div>
-                  <div className="mb-4">
-                    <CFormSelect
-                      value={selectedRole}
-                      onChange={(e) => setSelectedRole(e.target.value)}
-                      aria-label="Select Role"
-                      className="py-2"
-                      size="lg" // Larger dropdown
-                    >
-                      <option value="">Select a Role</option>
-                      <option value="staff">Staff</option>
-                      <option value="department_head">Department Head</option>
-                      <option value="manager">Manager</option>
-                    </CFormSelect>
-                  </div>
+
+                  {serverError && (
+                    <p style={{ color: "red", textAlign: "center" }}>
+                      {serverError}
+                    </p>
+                  )}
+
                   <CButton
                     color="primary"
+                    style={{
+                      backgroundColor: "#D9534F",
+                      margin: "10px 15px",
+                      padding: "12px 20px",
+                      borderRadius: "8px",
+                      fontWeight: "bold",
+                      fontSize: "15px",
+                      transition: "background-color 0.2s ease",
+                    }}
                     onClick={handleLogin}
-                    className="w-100 py-3" // Full-width, taller button
-                    size="lg" // Larger button
+                    className="w-100 py-3"
+                    size="lg"
                   >
                     Login
                   </CButton>

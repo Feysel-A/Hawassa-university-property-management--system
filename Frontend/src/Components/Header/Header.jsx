@@ -17,9 +17,23 @@ const Header = () => {
             </Link>
           </CCol>
           <CCol xs="2" className="text-right">
-            <CButton href="/login" color="primary" size="sm">
-              Login
-            </CButton>
+            <Link to="/login">
+              {" "}
+              <CButton
+                color="primary"
+                style={{
+                  backgroundColor: "#d9534f",
+                  margin: "10px 15px",
+                  padding: "12px 20px",
+                  borderRadius: "8px",
+                  fontWeight: "bold",
+                  fontSize: "15px",
+                  transition: "background-color 0.2s ease",
+                }}
+              >
+                Login
+              </CButton>
+            </Link>
           </CCol>
         </CRow>
       </CContainer>

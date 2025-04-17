@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   CButton,
   CCard,
@@ -13,13 +14,17 @@ import {
   CTableHeaderCell,
   CTableRow,
   CAlert,
+  CSpinner,
 } from "@coreui/react";
-import { CIcon } from "@coreui/icons-react";
 import { cilMenu } from "@coreui/icons";
-import "@coreui/coreui/dist/css/coreui.min.css";
+import CIcon from "@coreui/icons-react";
 import Sidebar from "../../../../Components/Sidebar/Sidebar";
 
 const DepartmentHeadDashboard = () => {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [user, setUser] = useState({});
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 992);
 
@@ -29,41 +34,54 @@ const DepartmentHeadDashboard = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const pendingRequests = [
-    {
-      id: 1,
-      staffId: "STAFF001",
-      assetName: "Desktop PC",
-      assetType: "Fixed",
-      quantity: 1,
-      purpose: "Teaching",
-      requestDate: "2025-03-16",
-    },
-    {
-      id: 2,
-      staffId: "STAFF002",
-      assetName: "Printer Ink",
-      assetType: "Consumable",
-      quantity: 2,
-      purpose: "Office use",
-      requestDate: "2025-03-16",
-    },
-  ];
+  // 👤 Get logged-in department head
+  useEffect(() => {
+    const getUser = localStorage.getItem("user");
+    if (getUser) setUser(JSON.parse(getUser));
+  }, []);
+  // ✅ Fetch department requests
+  useEffect(() => {
+    if (!user?.id) return;
 
-  const [message, setMessage] = useState("");
+    const fetchRequests = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/api/requests/department-head/${user.id}/pending-requests`
+        );
+        console.log(res)
+        setRequests(res.data);
+      } catch (err) {
+        console.error("Failed to fetch department requests", err);
+        setMessage("Failed to load requests.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleApprove = (request) => {
-    const approvalData = { ...request, status: "Approved", approvedBy: "DEPT001" };
-    console.log("Approving request:", approvalData);
-    setMessage(`Approved request for ${request.assetName}`);
-    setTimeout(() => setMessage(""), 3000);
-  };
+    fetchRequests();
+  }, [user]);
 
-  const handleReject = (request) => {
-    const rejectionData = { ...request, status: "Rejected", approvedBy: "DEPT001" };
-    console.log("Rejecting request:", rejectionData);
-    setMessage(`Rejected request for ${request.assetName}`);
-    setTimeout(() => setMessage(""), 3000);
+  // ✅ Approve/Reject Handlers
+  const updateRequest = async (requestId, status) => {
+    try {
+      await axios.put(
+        `http://localhost:5000/api/requests/approve/${requestId}`,
+        {
+          status,
+          approved_by: user.id,
+        }
+      );
+      setRequests((prev) => prev.filter((r) => r.id !== requestId));
+      setMessage(
+        `Request ${
+          status === "DeptApproved" ? "Approved" : "rejected"
+        } successfully!`
+      );
+      setTimeout(() => setMessage(""), 3000);
+    } catch (err) {
+      console.error("Action failed:", err);
+      setMessage("Error processing request.");
+    }
   };
 
   return (
@@ -85,100 +103,91 @@ const DepartmentHeadDashboard = () => {
           )}
           <h1 className="mb-0">Department Head Dashboard</h1>
         </div>
-        <CContainer fluid className="py-2">
+
+        <CContainer fluid className="py-3">
           <CRow>
-            <CCol xs={12}>
-              <p className="text-muted">
-                Welcome, [Department Head]! Review and approve staff requests here.
-              </p>
+            <CCol>
+              <p className="text-muted">Review and approve staff requests.</p>
             </CCol>
           </CRow>
+
           {message && (
-            <CAlert
-              color={message.includes("Approved") ? "success" : "danger"}
-              className="mb-4"
-            >
+            <CAlert color="info" className="mb-3 text-center">
               {message}
             </CAlert>
           )}
-          <CRow>
-            <CCol xs={12}>
-              <CCard>
-                <CCardHeader>
-                  <h4 className="mb-0">Pending Requests</h4>
-                </CCardHeader>
-                <CCardBody className="p-1">
-                  <div style={{ overflowX: "auto" }}>
-                    <CTable hover responsive>
-                      <CTableHead>
-                        <CTableRow>
-                          <CTableHeaderCell className="d-none d-sm-table-cell">ID</CTableHeaderCell>
-                          <CTableHeaderCell className="d-none d-sm-table-cell">Staff ID</CTableHeaderCell>
-                          <CTableHeaderCell>Asset Name</CTableHeaderCell>
-                          <CTableHeaderCell className="d-none d-sm-table-cell">Type</CTableHeaderCell>
-                          <CTableHeaderCell className="d-none d-sm-table-cell">Quantity</CTableHeaderCell>
-                          <CTableHeaderCell className="d-none d-md-table-cell">Purpose</CTableHeaderCell>
-                          <CTableHeaderCell className="d-none d-md-table-cell">Date</CTableHeaderCell>
-                          <CTableHeaderCell>Actions</CTableHeaderCell>
+
+          {loading ? (
+            <div className="text-center py-5">
+              <CSpinner color="primary" />
+              <p>Loading pending requests...</p>
+            </div>
+          ) : (
+            <CCard>
+              <CCardHeader>
+                <h4 className="mb-0">Pending Requests</h4>
+              </CCardHeader>
+              <CCardBody className="p-2">
+                <div style={{ overflowX: "auto" }}>
+                  <CTable hover responsive>
+                    <CTableHead>
+                      <CTableRow>
+                        <CTableHeaderCell>Request ID</CTableHeaderCell>
+                        <CTableHeaderCell>Requested By</CTableHeaderCell>
+                        <CTableHeaderCell>Asset Name</CTableHeaderCell>
+                        <CTableHeaderCell>Type</CTableHeaderCell>
+                        <CTableHeaderCell>Qty</CTableHeaderCell>
+                        <CTableHeaderCell>Purpose</CTableHeaderCell>
+                        <CTableHeaderCell>Date</CTableHeaderCell>
+                        <CTableHeaderCell>Actions</CTableHeaderCell>
+                      </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+                      {requests.map((req) => (
+                        <CTableRow key={req.id}>
+                          <CTableHeaderCell>{req.id}</CTableHeaderCell>
+                          <CTableHeaderCell>
+                            {req.staff_name || "—"}
+                          </CTableHeaderCell>
+                          <CTableHeaderCell>{req.asset_name}</CTableHeaderCell>
+                          <CTableHeaderCell>{req.asset_type}</CTableHeaderCell>
+                          <CTableHeaderCell>{req.quantity}</CTableHeaderCell>
+                          <CTableHeaderCell>{req.purpose}</CTableHeaderCell>
+                          <CTableHeaderCell>
+                            {req.request_date?.slice(0, 10)}
+                          </CTableHeaderCell>
+                          <CTableHeaderCell>
+                            <div className="d-flex gap-2">
+                              <CButton
+                                color="success"
+                                size="sm"
+                                onClick={() =>
+                                  updateRequest(req.id, "DeptApproved")
+                                }
+                              >
+                                Approve
+                              </CButton>
+                              <CButton
+                                color="danger"
+                                size="sm"
+                                onClick={() =>
+                                  updateRequest(req.id, "DeptDenied")
+                                }
+                              >
+                                Reject
+                              </CButton>
+                            </div>
+                          </CTableHeaderCell>
                         </CTableRow>
-                      </CTableHead>
-                      <CTableBody>
-                        {pendingRequests.map((request) => (
-                          <CTableRow key={request.id}>
-                            <CTableHeaderCell className="d-none d-sm-table-cell">{request.id}</CTableHeaderCell>
-                            <CTableHeaderCell className="d-none d-sm-table-cell">{request.staffId}</CTableHeaderCell>
-                            <CTableHeaderCell>{request.assetName}</CTableHeaderCell>
-                            <CTableHeaderCell className="d-none d-sm-table-cell">{request.assetType}</CTableHeaderCell>
-                            <CTableHeaderCell className="d-none d-sm-table-cell">{request.quantity}</CTableHeaderCell>
-                            <CTableHeaderCell className="d-none d-md-table-cell">{request.purpose}</CTableHeaderCell>
-                            <CTableHeaderCell className="d-none d-md-table-cell">{request.requestDate}</CTableHeaderCell>
-                            <CTableHeaderCell>
-                              <div className="d-flex flex-column flex-sm-row">
-                                <CButton
-                                  color="success"
-                                  size="sm"
-                                  className="mb-1 mb-sm-0 me-sm-2"
-                                  onClick={() => handleApprove(request)}
-                                >
-                                  Approve
-                                </CButton>
-                                <CButton
-                                  color="danger"
-                                  size="sm"
-                                  onClick={() => handleReject(request)}
-                                >
-                                  Reject
-                                </CButton>
-                              </div>
-                            </CTableHeaderCell>
-                          </CTableRow>
-                        ))}
-                      </CTableBody>
-                    </CTable>
-                  </div>
-                </CCardBody>
-              </CCard>
-            </CCol>
-          </CRow>
+                      ))}
+                    </CTableBody>
+                  </CTable>
+                </div>
+              </CCardBody>
+            </CCard>
+          )}
         </CContainer>
       </div>
-
-      {/* Inline CSS for mobile adjustments */}
-      <style jsx>{`
-        @media (max-width: 576px) {
-          .container-fluid {
-            padding-left: 5px !important;
-            padding-right: 5px !important;
-          }
-          .card-body {
-            padding: 5px !important;
-          }
-          th, td {
-            font-size: 0.85rem;
-            padding: 0.5rem !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

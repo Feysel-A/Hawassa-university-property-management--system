@@ -1,99 +1,193 @@
 import React from "react";
 import { CSidebar, CSidebarNav, CNavItem } from "@coreui/react";
 import { NavLink } from "react-router-dom";
-import { CIcon } from "@coreui/icons-react";
+import CIcon from "@coreui/icons-react";
 import {
-  cilSpeedometer, // Dashboard icon
-  cilList, // Request Assets icon
-  cilFolder, // My Assets icon
-  cilArrowRight, // Logout icon
+  cilSpeedometer,
+  cilList,
+  cilFolder,
+  cilArrowRight,
+  cilStorage,
+  cilLibraryAdd,
+  cilUserPlus,
+  cilPeople,
+  cilLibrary,
+  cilPlus,
 } from "@coreui/icons";
 import "@coreui/coreui/dist/css/coreui.min.css";
 
 const Sidebar = ({ role, visible, overlaid }) => {
-  // Role-based links with icons
   const staffLinks = [
     { to: "/dashboard/staff", label: "Dashboard", icon: cilSpeedometer },
-    { to: "/dashboard/staff/request", label: "Request Assets", icon: cilList },
-    { to: "/dashboard/staff/my-assets", label: "My Assets", icon: cilFolder },
+    {
+      to: "/dashboard/staff/request",
+      label: "Request New",
+      icon: cilLibrary,
+    },
+    {
+      to: "/dashboard/staff/pending-requests",
+      label: "Pending Requests",
+      icon: cilList,
+    },
+    {
+      to: "/dashboard/staff/my-assets",
+      label: "My Assets",
+      icon: cilFolder,
+    },
   ];
 
   const departmentHeadLinks = [
-    { to: "/dashboard/department-head", label: "Dashboard", icon: cilSpeedometer },
+    {
+      to: "/dashboard/department-head",
+      label: "Dashboard",
+      icon: cilSpeedometer,
+    },
+    {
+      to: "/dashboard/department-head/available-assets",
+      label: "Available Assets",
+      icon: cilStorage,
+    },
+    {
+      to: "/dashboard/department-head/request",
+      label: "Request New",
+      icon: cilLibraryAdd,
+    },
+    {
+      to: "/dashboard/department-head/pending-requests",
+      label: "Pending Requests",
+      icon: cilList,
+    },
+    {
+      to: "/dashboard/department-head/my-assets",
+      label: "My Assets",
+      icon: cilFolder,
+    },
   ];
 
   const managerLinks = [
-    { to: "/dashboard/manager", label: "Dashboard", icon: cilSpeedometer },
+    {
+      to: "/dashboard/manager",
+      label: "Dashboard",
+      icon: cilSpeedometer,
+    },
+    {
+      to: "/dashboard/manager/register-asset",
+      label: "Register Asset",
+      icon: cilPlus, // Replaces cilUserPlus
+    },
+    {
+      to: "/dashboard/manager/all-assets",
+      label: "Manage Assets",
+      icon: cilStorage, // Better fits for inventory/assets
+    },
+    {
+      to: "/dashboard/manager/report",
+      label: "Report",
+      icon: cilLibrary,
+    },
   ];
 
-  // Select links based on role
+  const adminLinks = [
+    { to: "/dashboard/admin", label: "Dashboard", icon: cilSpeedometer },
+    {
+      to: "/dashboard/admin/register-user",
+      label: "Register User",
+      icon: cilUserPlus,
+    },
+    { to: "/dashboard/admin/users", label: "Manage Users", icon: cilPeople },
+    { to: "/dashboard/admin/report", label: "Report", icon: cilLibrary },
+  ];
+  const storemanLink = [
+    { to: "/dashboard/storeman", label: "Dashboard", icon: cilSpeedometer },
+    {
+      to: "/dashboard/storeman/all-requests",
+      label: "Requests",
+      icon: cilList,
+    },
+  ];
   let links = [];
-  if (role === "staff") links = staffLinks;
-  else if (role === "department_head") links = departmentHeadLinks;
-  else if (role === "manager") links = managerLinks;
+
+  const normalizedRole = role?.toLowerCase();
+
+  if (normalizedRole === "staff") links = staffLinks;
+  else if (normalizedRole === "department_head") links = departmentHeadLinks;
+  else if (normalizedRole === "admin") links = adminLinks;
+  else if (normalizedRole === "manager") links = managerLinks;
+  else if (normalizedRole === "storeman") links = storemanLink;
 
   return (
     <CSidebar
-      narrow={true} // Slimmer sidebar
+      narrow
       visible={visible}
       overlaid={overlaid}
       style={{
         backgroundColor: "#08194a",
-        width: "200px", // Fixed width (narrower than default ~250px)
-        boxShadow: "2px 0 5px rgba(0,0,0,0.1)", // Subtle shadow
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        transition: "width 0.3s ease", // Smooth toggle animation
+        width: "220px",
+        boxShadow: "2px 0 10px rgba(0,0,0,0.15)",
+        transition: "all 0.3s ease-in-out",
+        fontFamily: "Segoe UI, sans-serif",
       }}
     >
-      <CSidebarNav className="pt-3">
+      <CSidebarNav className="pt-4">
         {links.map((link, index) => (
           <CNavItem key={index}>
             <NavLink
               to={link.to}
-              className="nav-link text-white d-flex align-items-center"
-              style={({ isActive }) => ({
-                backgroundColor: isActive ? "#1A4F77" : "transparent",
-                padding: "10px 15px",
-                borderRadius: "5px",
-                margin: "5px 10px",
-                transition: "background-color 0.2s ease",
-              })}
+              className={({ isActive }) =>
+                `nav-link d-flex align-items-center text-white ${
+                  isActive ? "active-link" : ""
+                }`
+              }
+              style={{
+                padding: "12px 20px",
+                margin: "8px 10px",
+                borderRadius: "8px",
+                fontSize: "15px",
+                fontWeight: "500",
+                transition: "all 0.2s ease",
+                textDecoration: "none",
+              }}
             >
-              <CIcon icon={link.icon} className="me-2" size="lg" />
+              <CIcon icon={link.icon} className="me-3" size="lg" />
               {link.label}
             </NavLink>
           </CNavItem>
         ))}
       </CSidebarNav>
-      <CSidebarNav className="pb-3">
+
+      {/* Footer section */}
+      <CSidebarNav className="pb-4 mt-auto">
         <CNavItem>
           <NavLink
             to="/login"
-            className="nav-link text-white d-flex align-items-center"
-            style={({ isActive }) => ({
-              backgroundColor: isActive ? "#1A4F77" : "transparent",
-              padding: "10px 15px",
-              borderRadius: "5px",
-              margin: "5px 10px",
+            className="nav-link d-flex align-items-center text-white"
+            style={{
+              backgroundColor: "#d9534f",
+              margin: "10px 15px",
+              padding: "12px 20px",
+              borderRadius: "8px",
+              fontWeight: "bold",
+              fontSize: "15px",
               transition: "background-color 0.2s ease",
-            })}
+            }}
           >
-            <CIcon icon={cilArrowRight} className="me-2" size="lg" />
+            <CIcon icon={cilArrowRight} className="me-3" />
             Logout
           </NavLink>
         </CNavItem>
       </CSidebarNav>
 
-      {/* Inline CSS for hover effects */}
-      <style jsx>{`
+      {/* Inline styling for active & hover effects */}
+      <style jsx="true">{`
         .nav-link:hover {
-          background-color: #1A4F77 !important;
+          background-color: #1a4f77 !important;
+        }
+        .active-link {
+          background-color: #1a4f77 !important;
         }
         @media (max-width: 991px) {
           .c-sidebar {
-            width: 180px !important; // Slightly narrower on mobile overlay
+            width: 180px !important;
           }
         }
       `}</style>

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   CButton,
   CCard,
@@ -12,170 +13,154 @@ import {
   CFormTextarea,
   CRow,
   CAlert,
+  CFormFeedback,
 } from "@coreui/react";
-import "@coreui/coreui/dist/css/coreui.min.css";
 import Sidebar from "../../../../Components/Sidebar/Sidebar";
 
 const RequestAssets = () => {
-  // Form state
   const [formData, setFormData] = useState({
-    assetName: "",
-    assetType: "",
+    name: "",
+    type: "",
     quantity: "",
     purpose: "",
-    requestDate: new Date().toISOString().split("T")[0], // Auto-filled
-    staffId: "STAFF001", // Placeholder from login
+    employee_id: null,
   });
+  const [user, setUser] = useState({});
   const [errors, setErrors] = useState({});
   const [submitMessage, setSubmitMessage] = useState("");
 
-  // Handle input changes
+  // Get logged-in user
+  useEffect(() => {
+    const getUser = localStorage.getItem("user");
+    if (getUser) {
+      const parsedUser = JSON.parse(getUser);
+      setUser(parsedUser);
+      setFormData((prev) => ({ ...prev, employee_id: parsedUser.id }));
+    }
+  }, []);
+
+  // Input change handler
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  // Validate form
+  // Form validation
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.assetName.trim())
-      newErrors.assetName = "Asset name is required";
-    if (!formData.assetType) newErrors.assetType = "Asset type is required";
-    if (!formData.quantity || formData.quantity <= 0)
-      newErrors.quantity = "Quantity must be a positive number";
+    if (!formData.name.trim()) newErrors.name = "Asset name is required";
+    if (!formData.type) newErrors.type = "Asset type is required";
+    if (!formData.quantity || parseInt(formData.quantity) <= 0)
+      newErrors.quantity = "Quantity must be greater than 0";
     if (!formData.purpose.trim()) newErrors.purpose = "Purpose is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  // Submit handler
+  const handleSubmit = async (e) => {
+    console.log(formData)
     e.preventDefault();
     setSubmitMessage("");
 
-    if (validateForm()) {
-      // Simulate backend call (replace with fetch/axios later)
-      console.log("Submitting request:", formData);
-      setSubmitMessage("Asset request submitted successfully!");
+    if (!validateForm()) return;
+
+    try {
+      await axios.post(
+        "http://localhost:5000/api/requests/unfulfilled-requests",
+        formData
+      );
+      setSubmitMessage("✅ Asset request submitted successfully!");
       setFormData({
-        assetName: "",
-        assetType: "",
+        name: "",
+        type: "",
         quantity: "",
         purpose: "",
-        requestDate: new Date().toISOString().split("T")[0],
-        staffId: "STAFF001",
-      }); // Reset form
-      setTimeout(() => setSubmitMessage(""), 3000); // Clear message
+        employee_id: user.id,
+      });
+      setTimeout(() => setSubmitMessage(""), 3000);
+    } catch (err) {
+      console.error("Request failed:", err);
+      setSubmitMessage("❌ Failed to submit request. Try again.");
     }
   };
 
   return (
     <div className="min-vh-100 d-flex">
-      {/* Sidebar */}
-      <Sidebar role="staff"/>
+      <Sidebar role="staff" />
+      <div className="flex-grow-1 bg-light d-flex align-items-center justify-content-center">
+        <CContainer style={{ maxWidth: "700px" }}>
+          <CCard className="shadow">
+            <CCardHeader className="text-center" style={{ backgroundColor: "#08194a", color: "white" }}>
+              <h3 style={{ color: "white" }}>Request New Asset</h3>
+              <small>Fill in the form to request a new item.</small>
+            </CCardHeader>
+            <CCardBody>
+              {submitMessage && (
+                <CAlert color={submitMessage.includes("✅") ? "success" : "danger"}>
+                  {submitMessage}
+                </CAlert>
+              )}
+              <CForm onSubmit={handleSubmit}>
+                <CFormInput
+                  label="Asset Name"
+                  name="name"
+                  placeholder="e.g. Laptop"
+                  className="mb-3"
+                  value={formData.name}
+                  onChange={handleChange}
+                  invalid={!!errors.name}
+                />
+                <CFormFeedback invalid>{errors.name}</CFormFeedback>
 
-      {/* Main Content */}
-      <div className="flex-grow-1 bg-light">
-        <CContainer className="py-4">
-          <CRow>
-            <CCol>
-              <h1 className="mb-4">Request New Assets</h1>
-              <p className="text-muted">
-                Fill out the form to request new assets.
-              </p>
-            </CCol>
-          </CRow>
+                <CFormSelect
+                  label="Asset Type"
+                  name="type"
+                  className="mb-3"
+                  value={formData.type}
+                  onChange={handleChange}
+                  invalid={!!errors.type}
+                >
+                  <option value="">Select Asset Type</option>
+                  <option value="Fixed">Fixed</option>
+                  <option value="Consumable">Consumable</option>
+                </CFormSelect>
+                <CFormFeedback invalid>{errors.type}</CFormFeedback>
 
-          {/* Submit Feedback */}
-          {submitMessage && (
-            <CAlert color="success" className="mb-4">
-              {submitMessage}
-            </CAlert>
-          )}
+                <CFormInput
+                  type="number"
+                  label="Quantity"
+                  name="quantity"
+                  placeholder="e.g. 1"
+                  className="mb-3"
+                  min={1}
+                  value={formData.quantity}
+                  onChange={handleChange}
+                  invalid={!!errors.quantity}
+                />
+                <CFormFeedback invalid>{errors.quantity}</CFormFeedback>
 
-          {/* Request Form */}
-          <CRow>
-            <CCol md="8">
-              <CCard>
-                <CCardHeader>
-                  <h4 className="mb-0">Asset Request Form</h4>
-                </CCardHeader>
-                <CCardBody>
-                  <CForm onSubmit={handleSubmit}>
-                    <CFormInput
-                      type="text"
-                      name="assetName"
-                      placeholder="Asset Name"
-                      className="mb-3"
-                      value={formData.assetName}
-                      onChange={handleChange}
-                      invalid={!!errors.assetName}
-                      feedbackInvalid={errors.assetName}
-                      label="Asset Name"
-                    />
-                    <CFormSelect
-                      name="assetType"
-                      className="mb-3"
-                      value={formData.assetType}
-                      onChange={handleChange}
-                      invalid={!!errors.assetType}
-                      feedbackInvalid={errors.assetType}
-                      label="Asset Type"
-                    >
-                      <option value="">Select Asset Type</option>
-                      <option value="Fixed">Fixed</option>
-                      <option value="Consumable">Consumable</option>
-                    </CFormSelect>
-                    <CFormInput
-                      type="number"
-                      name="quantity"
-                      placeholder="Quantity"
-                      className="mb-3"
-                      value={formData.quantity}
-                      onChange={handleChange}
-                      invalid={!!errors.quantity}
-                      feedbackInvalid={errors.quantity}
-                      label="Quantity"
-                      min="1"
-                    />
-                    <CFormTextarea
-                      name="purpose"
-                      placeholder="Purpose of the request"
-                      className="mb-3"
-                      value={formData.purpose}
-                      onChange={handleChange}
-                      invalid={!!errors.purpose}
-                      feedbackInvalid={errors.purpose}
-                      label="Purpose"
-                      rows="3"
-                    />
-                    <CFormInput
-                      type="date"
-                      name="requestDate"
-                      className="mb-3"
-                      value={formData.requestDate}
-                      onChange={handleChange}
-                      label="Request Date"
-                      disabled // Auto-filled
-                    />
-                    <CFormInput
-                      type="text"
-                      name="staffId"
-                      className="mb-4"
-                      value={formData.staffId}
-                      onChange={handleChange}
-                      label="Staff ID"
-                      disabled // From login
-                    />
-                    <CButton color="primary" type="submit">
-                      Submit Request
-                    </CButton>
-                  </CForm>
-                </CCardBody>
-              </CCard>
-            </CCol>
-          </CRow>
+                <CFormTextarea
+                  label="Purpose"
+                  name="purpose"
+                  placeholder="Describe the reason for this request"
+                  rows={3}
+                  className="mb-3"
+                  value={formData.purpose}
+                  onChange={handleChange}
+                  invalid={!!errors.purpose}
+                />
+                <CFormFeedback invalid>{errors.purpose}</CFormFeedback>
+
+                <div className="text-center">
+                  <CButton type="submit" color="primary">
+                    Submit Request
+                  </CButton>
+                </div>
+              </CForm>
+            </CCardBody>
+          </CCard>
         </CContainer>
       </div>
     </div>
