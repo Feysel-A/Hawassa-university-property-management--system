@@ -4,7 +4,6 @@ const assetController = require("../controllers/assetController");
 
 router.get("/", assetController.getAllAssets);
 router.post("/", assetController.registerAsset);
-router.put("/:id", assetController.updateAsset);
-router.delete("/:id", assetController.deleteAsset);
+router.put("/dispose/:id", assetController.disposeAsset);
 
 module.exports = router;

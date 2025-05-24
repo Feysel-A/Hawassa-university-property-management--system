@@ -125,7 +125,7 @@ const UserList = () => {
                 <option value="">Filter by Role</option>
                 <option value="Admin">Admin</option>
                 <option value="Staff">Staff</option>
-                <option value="Manager">Manager</option>
+                <option value="StockManager">Manager</option>
                 <option value="DepartmentHead">Department Head</option>
               </CFormSelect>
             </div>

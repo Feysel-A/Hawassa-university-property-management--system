@@ -16,6 +16,13 @@ import {
   CButton,
   CTableDataCell,
   CSpinner,
+  CModal,
+  CModalHeader,
+  CModalBody,
+  CModalFooter,
+  CForm,
+  CFormSelect,
+  CFormInput,
 } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
 import Sidebar from "../../../../Components/Sidebar/Sidebar";
@@ -26,12 +33,23 @@ const AvailableAssets = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [allAssets, setAllAssets] = useState([]);
 
-  // Fetch real assets
+  // Modal States
+  const [showModal, setShowModal] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState(null);
+  const [disposalData, setDisposalData] = useState({
+    replacement_type: "",
+    replacement_reason: "",
+    new_asset_id: "",
+    institution_name: "",
+  });
+
   const fetchAssets = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/assets");
       setAssets(res.data);
+      setAllAssets(res.data);
     } catch (err) {
       setError("Failed to load assets.");
     } finally {
@@ -43,16 +61,35 @@ const AvailableAssets = () => {
     fetchAssets();
   }, []);
 
-  const handleDisposal = async (id) => {
+  const handleDisposalClick = (asset) => {
+    setSelectedAsset(asset);
+    setDisposalData({
+      replacement_type: "",
+      replacement_reason: "",
+      new_asset_id: "",
+      institution_name: "",
+    });
+    setShowModal(true);
+  };
+
+  const handleDisposalSubmit = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/assets/${id}`, {
-        status: "Removed",
-      });
-      setMessage("Asset marked as removed successfully.");
-      fetchAssets(); // Refresh
+      await axios.put(
+        `http://localhost:5000/api/assets/dispose/${selectedAsset.id}`,
+        {
+          ...disposalData,
+          new_asset_id: disposalData.new_asset_id || null,
+          institution_name: disposalData.institution_name || null,
+        }
+      );
+      setMessage("Asset disposed successfully.");
+      setShowModal(false);
+      fetchAssets();
       setTimeout(() => setMessage(""), 3000);
     } catch (err) {
+      console.error(err);
       setMessage("Disposal failed.");
+      setShowModal(false);
     }
   };
 
@@ -121,11 +158,11 @@ const AvailableAssets = () => {
                           </CBadge>
                         </CTableDataCell>
                         <CTableDataCell>
-                          {asset.status !== "Removed" && (
+                          {asset.status === "Active" && (
                             <CButton
                               color="danger"
                               size="sm"
-                              onClick={() => handleDisposal(asset.id)}
+                              onClick={() => handleDisposalClick(asset)}
                             >
                               Dispose
                             </CButton>
@@ -138,6 +175,92 @@ const AvailableAssets = () => {
               </CCardBody>
             </CCard>
           )}
+
+          {/* Modal for Disposal */}
+          <CModal visible={showModal} onClose={() => setShowModal(false)}>
+            <CModalHeader>Asset Disposal</CModalHeader>
+            <CModalBody>
+              <CForm>
+                <CFormSelect
+                  label="Replacement Type"
+                  value={disposalData.replacement_type}
+                  onChange={(e) =>
+                    setDisposalData({
+                      ...disposalData,
+                      replacement_type: e.target.value,
+                    })
+                  }
+                  className="mb-3"
+                >
+                  <option value="">Select Type</option>
+                  <option value="Removed">Removed</option>
+                  <option value="Replaced">Replaced</option>
+                  <option value="Donated">Donated</option>
+                </CFormSelect>
+
+                <CFormInput
+                  label="Reason"
+                  value={disposalData.replacement_reason}
+                  onChange={(e) =>
+                    setDisposalData({
+                      ...disposalData,
+                      replacement_reason: e.target.value,
+                    })
+                  }
+                  className="mb-3"
+                />
+
+                {disposalData.replacement_type === "Replaced" && (
+                  <CFormSelect
+                    label="Select Replacement Asset"
+                    value={disposalData.new_asset_id}
+                    onChange={(e) =>
+                      setDisposalData({
+                        ...disposalData,
+                        new_asset_id: e.target.value,
+                      })
+                    }
+                    className="mb-3"
+                  >
+                    <option value="">Select Asset</option>
+                    {assets
+
+                      .filter(
+                        (a) =>
+                          a.status === "Active" && a.id !== selectedAsset?.id
+                      )
+                      .map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} ({a.model_name})
+                        </option>
+                      ))}
+                  </CFormSelect>
+                )}
+
+                {disposalData.replacement_type === "Donated" && (
+                  <CFormInput
+                    label="Institution Name"
+                    value={disposalData.institution_name}
+                    onChange={(e) =>
+                      setDisposalData({
+                        ...disposalData,
+                        institution_name: e.target.value,
+                      })
+                    }
+                    className="mb-3"
+                  />
+                )}
+              </CForm>
+            </CModalBody>
+            <CModalFooter>
+              <CButton color="secondary" onClick={() => setShowModal(false)}>
+                Cancel
+              </CButton>
+              <CButton color="danger" onClick={handleDisposalSubmit}>
+                Confirm Disposal
+              </CButton>
+            </CModalFooter>
+          </CModal>
         </CContainer>
       </div>
     </div>

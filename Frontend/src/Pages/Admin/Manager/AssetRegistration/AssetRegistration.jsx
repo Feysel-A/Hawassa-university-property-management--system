@@ -14,6 +14,7 @@ import {
 } from "@coreui/react";
 import "@coreui/coreui/dist/css/coreui.min.css";
 import Sidebar from "../../../../Components/Sidebar/Sidebar";
+import axios from "axios";
 
 const RegisterAsset = () => {
   const [formData, setFormData] = useState({
@@ -55,56 +56,44 @@ const RegisterAsset = () => {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch("http://localhost:5000/api/assets/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const res = await axios.post("http://localhost:5000/api/assets", formData);
 
-      if (response.ok) {
-        setSubmitMessage("Asset registered successfully!");
-        setFormData({
-          name: "",
-          model_name: "",
-          code: "",
-          type: "",
-          quantity: "",
-          cost: "",
-          department_id: 1,
-        });
-      } else {
-        const data = await response.json();
-        setSubmitMessage(data.message || "Asset registration failed.");
-      }
+      setSubmitMessage("✅ Asset registered successfully!");
+      setFormData({
+        name: "",
+        model_name: "",
+        code: "",
+        type: "",
+        quantity: "",
+        cost: "",
+        department_id: 1,
+      });
     } catch (error) {
-      console.error("Error registering asset:", error);
-      setSubmitMessage("Server error occurred. Try again later.");
+      console.error("Asset registration error:", error);
+      if (error.response?.data?.message) {
+        setSubmitMessage("❌ " + error.response.data.message);
+      } else {
+        setSubmitMessage("❌ Asset registration failed.");
+      }
     }
   };
 
   return (
     <div className="min-vh-100 d-flex">
       <Sidebar role="manager" />
-
-      {/* Centered Main Content */}
       <div className="flex-grow-1 bg-light d-flex justify-content-center align-items-center">
         <CContainer className="py-5">
           <CRow className="justify-content-center">
             <CCol xs={12} md={10} lg={8}>
               {submitMessage && (
-                <CAlert color="info" className="mb-4 text-center">
+                <CAlert color={submitMessage.includes("✅") ? "success" : "danger"} className="mb-4 text-center">
                   {submitMessage}
                 </CAlert>
               )}
 
               <CCard className="shadow-sm">
-                <CCardHeader
-                  className="text-white"
-                  style={{ backgroundColor: "#08194a" }}
-                >
-                  <h4 className="mb-0 text-center text-white">
-                    Asset Registration Form
-                  </h4>
+                <CCardHeader className="text-white" style={{ backgroundColor: "#08194a" }}>
+                  <h4 className="mb-0 text-center text-white">Asset Registration Form</h4>
                 </CCardHeader>
                 <CCardBody>
                   <CForm onSubmit={handleSubmit}>
@@ -168,7 +157,6 @@ const RegisterAsset = () => {
                       min="1"
                       className="mb-3"
                     />
-
                     <div className="text-center">
                       <CButton type="submit" color="primary">
                         Register Asset

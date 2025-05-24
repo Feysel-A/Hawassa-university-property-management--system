@@ -19,9 +19,18 @@ exports.getAllAssets = async (req, res) => {
 
 // POST new asset
 exports.registerAsset = async (req, res) => {
-  const { name, model_name, code, type, quantity, cost, department_id } = req.body;
+  const { name, model_name, code, type, quantity, cost, department_id } =
+    req.body;
 
-  if (!name || !model_name || !code || !type || !quantity || !cost || !department_id) {
+  if (
+    !name ||
+    !model_name ||
+    !code ||
+    !type ||
+    !quantity ||
+    !cost ||
+    !department_id
+  ) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
@@ -39,34 +48,38 @@ exports.registerAsset = async (req, res) => {
 };
 
 // PUT update asset
-exports.updateAsset = async (req, res) => {
+exports.disposeAsset = async (req, res) => {
   const { id } = req.params;
-  const { name, model_name, code, type, quantity, cost, status, department_id } = req.body;
+  const {
+    replacement_type,         // 'Replaced', 'Donated', 'Removed'
+    replacement_reason,       // explanation
+    new_asset_id,             // optional
+    institution_name          // optional (for 'Donated')
+  } = req.body;
 
   try {
+    // 1. Update asset status
     await db.query(
-      `UPDATE Assets 
-       SET name = ?, model_name = ?, code = ?, type = ?, quantity = ?, 
-           cost = ?, status = ?, department_id = ?
-       WHERE id = ?`,
-      [name, model_name, code, type, quantity, cost, status, department_id, id]
-    );
-    res.json({ message: "Asset updated successfully" });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to update asset", details: err });
-  }
-};
 
-// DELETE (soft delete) asset
-exports.deleteAsset = async (req, res) => {
-  const { id } = req.params;
-  try {
-    await db.query(
-      "UPDATE Assets SET status = 'Removed' WHERE id = ?",
-      [id]
+      `UPDATE Assets SET status = ? WHERE id = ?`,
+      [replacement_type, id]
     );
-    res.json({ message: "Asset marked as removed" });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to remove asset", details: err });
+
+    // 2. Insert disposal record
+    await db.query(
+      `INSERT INTO Asset_Disposals (asset_id, replacement_type, replacement_reason, new_asset_id, institution_name)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        id,
+        replacement_type,
+        replacement_reason || null,
+        new_asset_id || null,
+        institution_name || null
+      ]
+    );
+    res.status(200).json({ message: "Asset disposed successfully." });
+  } catch (error) {
+    console.error("Disposal error:", error);
+    res.status(500).json({ error: "Disposal failed", details: error.message });
   }
 };
