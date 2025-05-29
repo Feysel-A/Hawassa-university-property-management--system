@@ -7,115 +7,206 @@ import {
   CContainer,
   CRow,
   CAlert,
+  CButton,
+  CTable,
+  CTableBody,
+  CTableHead,
+  CTableHeaderCell,
+  CTableRow,
+  CTableDataCell,
+  CSpinner,
+  CFormInput,
 } from "@coreui/react";
-import Sidebar from "../../../../Components/Sidebar/Sidebar"; // Import reusable Sidebar
-import "@coreui/coreui/dist/css/coreui.min.css";
+import Sidebar from "../../../../Components/Sidebar/Sidebar";
 
 const AdminDashboard = () => {
-  // State for statistics
   const [statistics, setStatistics] = useState({
     totalAssets: 0,
     totalRequests: 0,
     totalApproved: 0,
     totalRejected: 0,
   });
-  const [alertMessage, setAlertMessage] = useState("");
 
-  // Fetch statistics from backend
+  const [activeView, setActiveView] = useState("");
+  const [details, setDetails] = useState([]);
+  const [filteredDetails, setFilteredDetails] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
-    fetch("/api/admin/statistics") // Replace with actual backend endpoint
+    fetch("http://localhost:5000/api/reports/statistics")
       .then((res) => res.json())
       .then((data) => setStatistics(data))
       .catch(() =>
-        setAlertMessage("Failed to load statistics. Please try again later.")
+        setAlertMessage("Failed to load statistics. Please try again.")
       );
   }, []);
+
+  const fetchDetails = async (type) => {
+    setActiveView(type);
+    setLoading(true);
+    setSearchTerm(""); // Reset search
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/reports/details/${type}`
+      );
+      const data = await res.json();
+      setDetails(data || []);
+      setFilteredDetails(data || []);
+    } catch (err) {
+      setDetails([]);
+      setFilteredDetails([]);
+      setAlertMessage("Failed to fetch details.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    const filtered = details.filter((row) =>
+      Object.values(row).some((val) =>
+        String(val).toLowerCase().includes(term)
+      )
+    );
+    setFilteredDetails(filtered);
+  };
+
+  const renderTable = () => {
+    if (loading) {
+      return (
+        <div className="text-center py-3">
+          <CSpinner color="primary" />
+        </div>
+      );
+    }
+
+    if (filteredDetails.length === 0) {
+      return <p className="text-center text-muted">No records found.</p>;
+    }
+
+    const headers = Object.keys(filteredDetails[0]);
+
+    return (
+      <>
+        <CFormInput
+          className="mb-3"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={handleSearch}
+        />
+        <CTable hover responsive>
+          <CTableHead>
+            <CTableRow>
+              {headers.map((key) => (
+                <CTableHeaderCell key={key}>{key}</CTableHeaderCell>
+              ))}
+            </CTableRow>
+          </CTableHead>
+          <CTableBody>
+            {filteredDetails.map((row, idx) => (
+              <CTableRow key={idx}>
+                {headers.map((key) => (
+                  <CTableDataCell key={key}>{row[key]}</CTableDataCell>
+                ))}
+              </CTableRow>
+            ))}
+          </CTableBody>
+        </CTable>
+      </>
+    );
+  };
+
+  const cards = [
+    {
+      label: "Total Assets",
+      count: statistics.totalAssets,
+      color: "success",
+      type: "assets",
+    },
+    {
+      label: "Total Requests",
+      count: statistics.totalRequests,
+      color: "info",
+      type: "requests",
+    },
+    {
+      label: "Approved Requests",
+      count: statistics.totalApproved,
+      color: "primary",
+      type: "approved",
+    },
+    {
+      label: "Rejected Requests",
+      count: statistics.totalRejected,
+      color: "danger",
+      type: "rejected",
+    },
+  ];
 
   return (
     <div className="min-vh-100 d-flex">
       <Sidebar role="admin" />
-
       <div className="flex-grow-1 bg-light">
         <CContainer className="py-4">
-          <CRow>
-            <CCol>
-              <h1 className="mb-4 text-center">Admin Dashboard</h1>
-              <p className="text-muted">
-                Welcome, Admin! Here's an overview of key system metrics.
-              </p>
-            </CCol>
-          </CRow>
-
+          <h2 className="text-center mb-4">Admin Dashboard</h2>
           {alertMessage && <CAlert color="danger">{alertMessage}</CAlert>}
 
-          <CRow>
-            {/* Total Assets */}
-            <CCol md={6} lg={3}>
-              <CCard>
-                <CCardHeader>Total Assets</CCardHeader>
-                <CCardBody>
-                  <h2 className="text-center text-success">
-                    {statistics.totalAssets}
-                  </h2>
-                  <p className="text-center text-muted">Registered Assets</p>
-                </CCardBody>
-              </CCard>
-            </CCol>
-
-            {/* Total Requests */}
-            <CCol md={6} lg={3}>
-              <CCard>
-                <CCardHeader>Total Requests</CCardHeader>
-                <CCardBody>
-                  <h2 className="text-center text-info">
-                    {statistics.totalRequests}
-                  </h2>
-                  <p className="text-center text-muted">Submitted Requests</p>
-                </CCardBody>
-              </CCard>
-            </CCol>
-
-            {/* Approved Requests */}
-            <CCol md={6} lg={3}>
-              <CCard>
-                <CCardHeader>Approved Requests</CCardHeader>
-                <CCardBody>
-                  <h2 className="text-center text-primary">
-                    {statistics.totalApproved}
-                  </h2>
-                  <p className="text-center text-muted">Requests Approved</p>
-                </CCardBody>
-              </CCard>
-            </CCol>
-
-            {/* Rejected Requests */}
-            <CCol md={6} lg={3}>
-              <CCard>
-                <CCardHeader>Rejected Requests</CCardHeader>
-                <CCardBody>
-                  <h2 className="text-center text-danger">
-                    {statistics.totalRejected}
-                  </h2>
-                  <p className="text-center text-muted">Requests Rejected</p>
-                </CCardBody>
-              </CCard>
-            </CCol>
+          <CRow className="mb-4">
+            {cards.map((card) => (
+              <CCol key={card.type} md={6} lg={3}>
+                <CCard
+                  style={{
+                    cursor: "pointer",
+                    border:
+                      activeView === card.type
+                        ? `2px solid #${card.color}`
+                        : "",
+                    boxShadow:
+                      activeView === card.type ? "0 0 10px #ccc" : "",
+                  }}
+                  onClick={() => fetchDetails(card.type)}
+                >
+                  <CCardHeader>{card.label}</CCardHeader>
+                  <CCardBody>
+                    <h3 className={`text-center text-${card.color}`}>
+                      {card.count}
+                    </h3>
+                    <p className="text-center text-muted">{card.label}</p>
+                  </CCardBody>
+                </CCard>
+              </CCol>
+            ))}
           </CRow>
 
-          {/* Charts Section */}
-          <CRow className="mt-4">
-            <CCol>
-              <CCard>
-                <CCardHeader>Activity Overview</CCardHeader>
-                <CCardBody>
-                  <p className="text-center">
-                    Add your charts here for deeper insights (e.g., asset
-                    trends, request statistics over time).
-                  </p>
-                </CCardBody>
-              </CCard>
-            </CCol>
-          </CRow>
+          {activeView && (
+            <CRow>
+              <CCol>
+                <CCard>
+                  <CCardHeader className="d-flex justify-content-between align-items-center">
+                    <strong>
+                      {activeView.charAt(0).toUpperCase() +
+                        activeView.slice(1)}{" "}
+                      Details
+                    </strong>
+                    <CButton
+                      color="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setActiveView("");
+                        setSearchTerm("");
+                      }}
+                    >
+                      Close
+                    </CButton>
+                  </CCardHeader>
+                  <CCardBody>{renderTable()}</CCardBody>
+                </CCard>
+              </CCol>
+            </CRow>
+          )}
         </CContainer>
       </div>
     </div>
