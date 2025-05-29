@@ -167,6 +167,7 @@ CREATE INDEX idx_asset_id ON Stock(asset_id);
 CREATE INDEX idx_request_status ON Requests(status);
 
 
+-- Extend status ENUM for returns
 ALTER TABLE Requests MODIFY COLUMN status ENUM(
   'Pending',
   'DeptApproved',
@@ -174,8 +175,10 @@ ALTER TABLE Requests MODIFY COLUMN status ENUM(
   'ManagerApproved',
   'ManagerDenied',
   'Allocated',
-  'Accepted',     -- ✅ Final status: user accepted
-  'RejectedByUser' -- Optional
+  'Accepted',         -- Final confirmed
+  'RejectedByUser',   -- Optional: user rejected item
+  'ReturnRequested',  -- ✅ New: user initiates return
+  'Returned'          -- ✅ New: storeman confirmed return
 ) DEFAULT 'Pending';
 
 ALTER TABLE Requests

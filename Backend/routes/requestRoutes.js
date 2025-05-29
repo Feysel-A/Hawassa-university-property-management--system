@@ -36,5 +36,10 @@ router.get("/storeman", requestController.getRequestsForStoreman);
 router.get("/storeman/handled", requestController.getHandledRequestsByStoreman);
 // Get all requests for a specific user
 router.get("/user/:id", requestController.getUserRequests);
-
+// Get Requests  for return asset to storekeeper from staff/DepartmentHead
+router.get("/return-requests", requestController.getRequestReturn);
+// PUT request for return asset to storekeeper from staff/DepartmentHead
+router.put("/return/:id", requestController.requestReturn);
+// PUT request for confirm return by storekeeper
+router.put("/confirm-return/:id", requestController.confirmReturn);
 module.exports = router;

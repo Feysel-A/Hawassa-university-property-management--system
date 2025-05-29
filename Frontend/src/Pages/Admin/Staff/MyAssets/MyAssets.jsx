@@ -37,9 +37,7 @@ const AcceptedAssets = () => {
 
   const fetchAssets = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/requests/user/${staffId}`
-      );
+      const res = await axios.get(`http://localhost:5000/api/requests/user/${staffId}`);
       const filtered = res.data.filter((req) => req.status === "Accepted");
       setAcceptedAssets(filtered);
     } catch (err) {
@@ -54,6 +52,19 @@ const AcceptedAssets = () => {
       fetchAssets();
     }
   }, [staffId]);
+
+  const handleReturnRequest = async (id) => {
+    try {
+      const res = await axios.put(`http://localhost:5000/api/requests/return/${id}`);
+      setMessage(res.data.message || "Return requested.");
+      fetchAssets(); // Refresh the list
+    } catch (err) {
+      console.error("Failed to request return:", err);
+      setMessage("Failed to request return.");
+    } finally {
+      setTimeout(() => setMessage(""), 3000);
+    }
+  };
 
   return (
     <div className="min-vh-100 d-flex">
@@ -114,7 +125,7 @@ const AcceptedAssets = () => {
                               <CButton
                                 color="warning"
                                 size="sm"
-                                onClick={() => alert("Return functionality coming soon!")}
+                                onClick={() => handleReturnRequest(asset.id)}
                               >
                                 Return
                               </CButton>

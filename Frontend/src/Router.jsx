@@ -10,7 +10,7 @@ import PendingRequests from "./Pages/Admin/Staff/PendingRequests/PendingRequests
 import RequestAssets from "./Pages/Admin/Staff/RequestAssets/RequestAssets";
 import ManagerDashboard from "./Pages/Admin/Manager/Dashboard/ManagerDashboard";
 import DepartmentHeadDashboard from "./Pages/Admin/Department/Dashboard/DepartmentHeadDashboard";
-import PendingRequestsDh from  "./Pages/Admin/Department/PendingRequestsDh/PendingRequestsDh";
+import PendingRequestsDh from "./Pages/Admin/Department/PendingRequestsDh/PendingRequestsDh";
 import AdminDashboard from "./Pages/Admin/Admin/Dashboard/AdminDashboard";
 import UserRegistration from "./Pages/Admin/Admin/UserRegistration/UserRegistration";
 import UserList from "./Pages/Admin/Admin/UserList/UserList";
@@ -23,6 +23,7 @@ import MyAssetsForDH from "./Pages/Admin/Department/MyAssetsForDH/MyAssetsForDH"
 import ReportsPageForMn from "./Pages/Admin/ReportPage/ReportPage";
 import StoreManDashboard from "./Pages/Admin/StoreMan/StoreManDashboard/StoreManDashboard";
 import AllRequests from "./Pages/Admin/StoreMan/AllRequests/AllRequests";
+import ReturnedAssets from "./Pages/Admin/StoreMan/ReturnedAssets/ReturnedAssets";
 function Router() {
   const user = JSON.parse(localStorage.getItem("user"));
   // console.log("User role:", user?.role);
@@ -47,7 +48,10 @@ function Router() {
           path="/dashboard/department-head/my-assets"
           element={<MyAssetsForDH />}
         />
-        <Route path="/dashboard/department-head/pending-requests" element={<PendingRequestsDh />} />
+        <Route
+          path="/dashboard/department-head/pending-requests"
+          element={<PendingRequestsDh />}
+        />
         <Route
           path="/dashboard/department-head"
           element={<DepartmentHeadDashboard />}
@@ -80,6 +84,10 @@ function Router() {
         <Route
           path="/dashboard/storeman/all-requests"
           element={<AllRequests />}
+        />
+        <Route
+          path="/dashboard/storeman/returned-assets"
+          element={<ReturnedAssets />}
         />
         {/* admin dashboard */}
         <Route path="/dashboard/admin" element={<AdminDashboard />} />

@@ -34,7 +34,6 @@ const StaffDashboard = () => {
   useEffect(() => {
     if (getUser) setUser(JSON.parse(getUser));
   }, []);
-
   const staffId = user.id;
   const staffName = user.name;
 
@@ -86,20 +85,33 @@ const StaffDashboard = () => {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/requests", {
+      // Step 1: Submit the request
+      const res = await axios.post("http://localhost:5000/api/requests", {
         employee_id: staffId,
         asset_id: asset.id,
         quantity,
-        purpose: "Personal Use",
+        purpose: "Departmental Use",
       });
 
+      const newRequestId = res.data.request_id;
+      // Step 2: Auto-approve the request as Dept Head
+      if (newRequestId) {
+        await axios.put(
+          `http://localhost:5000/api/requests/approve/${newRequestId}`,
+          {
+            status: "DeptApproved",
+            approved_by: user.id,
+          }
+        );
+      }
+
       setRequestMessage(
-        `Requested "${asset.name}" (x${quantity}) successfully!`
+        `✅ Requested "${asset.name}" (x${quantity}) successfully!`
       );
       setTimeout(() => setRequestMessage(""), 3000);
     } catch (err) {
       console.error("Request failed:", err);
-      setRequestMessage("Failed to request asset. Try again.");
+      setRequestMessage("❌ Failed to request asset. Try again.");
     }
   };
 

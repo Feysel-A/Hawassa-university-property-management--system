@@ -6,16 +6,24 @@ exports.createRequest = async (req, res) => {
   if (!employee_id || !asset_id || !quantity || !purpose) {
     return res.status(400).json({ error: "All fields are required" });
   }
+
   try {
-    await db.query(
+    const [result] = await db.query(
       "INSERT INTO Requests (employee_id, asset_id, quantity, purpose) VALUES (?, ?, ?, ?)",
       [employee_id, asset_id, quantity, purpose]
     );
-    res.json({ message: "Request created successfully" });
+
+    const insertedId = result.insertId;
+
+    res.json({
+      message: "Request created successfully",
+      request_id: insertedId, // ✅ Add this line
+    });
   } catch (error) {
     res.status(500).json({ error: "Failed to create request", details: error });
   }
 };
+
 exports.createUnfulfilledRequest = async (req, res) => {
   const { employee_id, name, type, quantity, purpose } = req.body;
   if (!employee_id || !name || !type || !quantity || !purpose) {
@@ -214,7 +222,6 @@ exports.getAllRequests = async (req, res) => {
 };
 
 // Get ALL requests (fulfilled + unfulfilled) for a specific user
-
 exports.getUserRequests = async (req, res) => {
   const { id } = req.params;
 
@@ -394,5 +401,90 @@ exports.getHandledRequestsByStoreman = async (req, res) => {
       error: "Failed to fetch handled requests",
       details: error.message,
     });
+  }
+};
+// PUT request for return asset to storekeeper from staff/DepartmentHead
+exports.requestReturn = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await db.query(
+      `UPDATE Requests
+       SET status = 'ReturnRequested',
+           user_confirmation_date = NOW()
+       WHERE id = ? AND status = 'Accepted'`,
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res
+        .status(400)
+        .json({ error: "Invalid request or not eligible for return" });
+    }
+
+    res.json({ message: "Return requested successfully" });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "Return request failed", details: err.message });
+  }
+};
+// GET request for return asset to storekeeper from staff/DepartmentHead
+exports.getRequestReturn = async (req, res) => {
+  try {
+    const [results] = await db.query(
+      `
+      SELECT 
+        r.id,
+        CONCAT(u.first_name, ' ', u.last_name) AS staff_name,
+        a.name AS asset_name,
+        a.type AS asset_type,
+        r.quantity,
+        r.status,
+        r.request_date,
+        r.allocation_date
+      FROM Requests r
+      JOIN Users u ON r.employee_id = u.id
+      JOIN Assets a ON r.asset_id = a.id
+      WHERE r.status = 'ReturnRequested'
+      ORDER BY r.allocation_date DESC
+      `
+    );
+
+    res.json(results);
+  } catch (error) {
+    console.error("Error fetching handled requests:", error);
+    res.status(500).json({
+      error: "Failed to fetch handled requests",
+      details: error.message,
+    });
+  }
+};
+//PUT request for confirm return by storekeeper
+exports.confirmReturn = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await db.query(
+      `UPDATE Requests
+       SET status = 'Returned',
+           user_confirmation_date = NOW()
+       WHERE id = ? AND status = 'ReturnRequested'`,
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res
+        .status(400)
+        .json({ error: "Return not found or not in requested state" });
+    }
+
+    res.json({ message: "Return confirmed by storeman" });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "Failed to confirm return", details: err.message });
   }
 };

@@ -54,7 +54,20 @@ const AcceptedAssets = () => {
       fetchAssets();
     }
   }, [staffId]);
-
+  const handleReturnRequest = async (id) => {
+    try {
+      const res = await axios.put(
+        `http://localhost:5000/api/requests/return/${id}`
+      );
+      setMessage(res.data.message || "Return requested.");
+      fetchAssets(); // Refresh the list
+    } catch (err) {
+      console.error("Failed to request return:", err);
+      setMessage("Failed to request return.");
+    } finally {
+      setTimeout(() => setMessage(""), 3000);
+    }
+  };
   return (
     <div className="min-vh-100 d-flex">
       <Sidebar role="department_head" />
@@ -63,7 +76,9 @@ const AcceptedAssets = () => {
           <CRow>
             <CCol>
               <h1 className="mb-4">My Accepted Assets</h1>
-              <p className="text-muted">These are the assets you’ve accepted and now possess.</p>
+              <p className="text-muted">
+                These are the assets you’ve accepted and now possess.
+              </p>
             </CCol>
           </CRow>
 
@@ -114,7 +129,7 @@ const AcceptedAssets = () => {
                               <CButton
                                 color="warning"
                                 size="sm"
-                                onClick={() => alert("Return functionality coming soon!")}
+                                onClick={() => handleReturnRequest(asset.id)}
                               >
                                 Return
                               </CButton>

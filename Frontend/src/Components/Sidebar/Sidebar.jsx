@@ -104,6 +104,11 @@ const Sidebar = ({ role, visible, overlaid }) => {
       label: "Requests",
       icon: cilList,
     },
+    {
+      to: "/dashboard/storeman/returned-assets",
+      label: "Returned Assets",
+      icon: cilFolder, // 📂 Good for return confirmation
+    },
   ];
   let links = [];
 
