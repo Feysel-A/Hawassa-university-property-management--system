@@ -6,76 +6,27 @@ import {
   CContainer,
   CRow,
   CCol,
-  CButton,
   CAlert,
   CBadge,
 } from "@coreui/react";
-import { Bar } from "react-chartjs-2";
 import Sidebar from "../../../../Components/Sidebar/Sidebar";
-import "@coreui/coreui/dist/css/coreui.min.css";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
 
 const ReportsPage = () => {
-  const [statistics, setStatistics] = useState({
-    totalAssets: 0,
-    totalApprovedRequests: 0,
-    totalPendingRequests: 0,
-    stockInCost: 0,
-    stockOutCost: 0,
-  });
-  const [chartData, setChartData] = useState({});
+  const [report, setReport] = useState({});
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const fetchStatistics = async () => {
+    const fetchReport = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/reports/summary");
+        const res = await fetch("http://localhost:5000/api/reports/enhanced-report");
         const data = await res.json();
-        setStatistics(data);
+        setReport(data);
       } catch (err) {
-        console.error(err);
-        setMessage("Failed to load statistics. Please try again.");
+        console.error("Error loading report:", err);
+        setMessage("Failed to load report. Please try again.");
       }
     };
-
-    const fetchChart = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/reports/chart-data");
-        const data = await res.json();
-        setChartData({
-          labels: data.labels,
-          datasets: [
-            {
-              label: "Monthly Requests",
-              data: data.values,
-              backgroundColor: "#003366",
-            },
-          ],
-        });
-      } catch (err) {
-        console.error("Chart loading failed");
-      }
-    };
-
-    fetchStatistics();
-    fetchChart();
+    fetchReport();
   }, []);
 
   return (
@@ -83,110 +34,78 @@ const ReportsPage = () => {
       <Sidebar role="admin" />
       <CContainer className="py-4 flex-grow-1">
         <CCard>
-          <CCardHeader
-            className="text-white text-center"
-            style={{ backgroundColor: "#08194a" }}
-          >
-            <h3 style={{ color: "white" }}>
-              Store Efficiency & Balance Report
-            </h3>
+          <CCardHeader className="text-white text-center" style={{ backgroundColor: "#08194a" }}>
+            <h4>📊 Asset Efficiency & Balance Report</h4>
           </CCardHeader>
           <CCardBody>
             {message && <CAlert color="danger">{message}</CAlert>}
 
-            {/* Top Summary Cards */}
-            <CRow className="mb-4">
-              <CCol md={3}>
+            <CRow className="mb-4 text-center">
+              <CCol md={4}>
                 <CCard>
-                  <CCardBody className="text-center">
-                    <h4>{statistics.totalAssets}</h4>
+                  <CCardBody>
+                    <h5>{report.totalAssets}</h5>
                     <CBadge color="success">Total Assets</CBadge>
                   </CCardBody>
                 </CCard>
               </CCol>
-              <CCol md={3}>
+              <CCol md={4}>
                 <CCard>
-                  <CCardBody className="text-center">
-                    <h4>{statistics.totalApprovedRequests}</h4>
+                  <CCardBody>
+                    <h5>{report.totalApproved}</h5>
                     <CBadge color="primary">Approved Requests</CBadge>
                   </CCardBody>
                 </CCard>
               </CCol>
-              <CCol md={3}>
+              <CCol md={4}>
                 <CCard>
-                  <CCardBody className="text-center">
-                    <h4>{statistics.totalPendingRequests}</h4>
+                  <CCardBody>
+                    <h5>{report.totalPending}</h5>
                     <CBadge color="warning">Pending Requests</CBadge>
                   </CCardBody>
                 </CCard>
               </CCol>
-              <CCol md={3}>
-                <CCard>
-                  <CCardBody className="text-center">
-                    <h4 className="text-success">
-                      ETB {statistics.stockInCost.toLocaleString()}
-                    </h4>
-                    <CBadge color="info">Total Stock-In (Cost)</CBadge>
-                  </CCardBody>
-                </CCard>
-              </CCol>
             </CRow>
 
-            {/* Stock In vs Out Balance */}
-            <CRow className="mb-4">
+            <CRow className="mb-4 text-center">
               <CCol md={6}>
                 <CCard>
-                  <CCardBody className="text-center">
-                    <h4 className="text-success">
-                      ETB {statistics.stockInCost.toLocaleString()}
-                    </h4>
-                    <p className="mb-0">Total Stock-In</p>
+                  <CCardBody>
+                    <h5 className="text-success">
+                      ETB {report.totalStockInCost?.toLocaleString()}
+                    </h5>
+                    <p>💼 Total Stock-In Value</p>
                   </CCardBody>
                 </CCard>
               </CCol>
               <CCol md={6}>
                 <CCard>
-                  <CCardBody className="text-center">
-                    <h4 className="text-danger">
-                      ETB {statistics.stockOutCost.toLocaleString()}
-                    </h4>
-                    <p className="mb-0">Total Stock-Out</p>
+                  <CCardBody>
+                    <h5 className="text-danger">
+                      ETB {report.totalStockOutCost?.toLocaleString()}
+                    </h5>
+                    <p>📤 Total Stock-Out Value</p>
                   </CCardBody>
                 </CCard>
               </CCol>
             </CRow>
 
-            {/* Chart */}
-            <CRow className="mb-4">
+            <CRow>
               <CCol>
-                {chartData.labels ? (
-                  <Bar
-                    data={chartData}
-                    options={{
-                      responsive: true,
-                      plugins: {
-                        legend: { display: false },
-                      },
-                    }}
-                  />
-                ) : (
-                  <p className="text-muted text-center">
-                    Chart will be loaded here
-                  </p>
-                )}
-              </CCol>
-            </CRow>
-
-            {/* Export Buttons */}
-            <CRow className="text-center">
-              <CCol>
-                <CButton color="primary" className="me-3">
-                  Download PDF
-                </CButton>
-                <CButton color="success" className="me-3">
-                  Export to Excel
-                </CButton>
-                <CButton color="info">Export to CSV</CButton>
+                <CCard>
+                  <CCardBody className="text-center">
+                    <h4
+                      className={`${
+                        report.balance > 0 ? "text-success" : "text-danger"
+                      }`}
+                    >
+                      ETB {report.balance?.toLocaleString()}
+                    </h4>
+                    <CBadge color={report.balance > 0 ? "info" : "danger"}>
+                      Store Balance Value
+                    </CBadge>
+                  </CCardBody>
+                </CCard>
               </CCol>
             </CRow>
           </CCardBody>

@@ -1,65 +1,4 @@
 const db = require("../config/database");
-exports.getSummaryReport = async (req, res) => {
-  try {
-    // 1. Get all assets for total stock-in cost
-    const [assets] = await db.query("SELECT quantity, cost FROM Assets");
-
-    // 2. Join Requests with Assets to get cost of each requested item
-    const [requests] = await db.query(`
-      SELECT r.status, r.quantity, a.cost
-      FROM Requests r
-      JOIN Assets a ON r.asset_id = a.id
-    `);
-
-    const totalAssets = assets.length;
-    const totalApprovedRequests = requests.filter((r) =>
-      ["DeptApproved", "ManagerApproved", "Allocated"].includes(r.status)
-    ).length;
-    const totalPendingRequests = requests.filter(
-      (r) => r.status === "Pending"
-    ).length;
-
-    const stockInCost = assets.reduce((sum, a) => sum + a.quantity * a.cost, 0);
-
-    const stockOutCost = requests
-      .filter((r) => r.status === "Accepted")
-      .reduce((sum, r) => sum + r.quantity * r.cost, 0);
-
-    res.json({
-      totalAssets,
-      totalApprovedRequests,
-      totalPendingRequests,
-      stockInCost,
-      stockOutCost,
-    });
-  } catch (error) {
-    console.error("Report Error:", error);
-    res.status(500).json({ error: "Failed to generate report" });
-  }
-};
-
-// controllers/reportController.js
-
-exports.getMonthlyChartData = async (req, res) => {
-  try {
-    const [rows] = await db.query(`
-      SELECT 
-        DATE_FORMAT(request_date, '%Y-%m') AS month,
-        COUNT(*) AS total_requests
-      FROM Requests
-      GROUP BY month
-      ORDER BY month ASC
-    `);
-
-    const labels = rows.map((r) => r.month);
-    const values = rows.map((r) => r.total_requests);
-
-    res.json({ labels, values });
-  } catch (error) {
-    console.error("Chart data error:", error);
-    res.status(500).json({ error: "Failed to load chart data" });
-  }
-};
 // backend/controllers/admin.js
 exports.getStatistics = async (req, res) => {
   try {
@@ -129,3 +68,44 @@ exports.getDetailsByType = async (req, res) => {
   }
 };
 
+exports.getEnhancedReport = async (req, res) => {
+  try {
+    const [assets] = await db.query("SELECT quantity, cost FROM Assets");
+    const [requests] = await db.query(
+      `SELECT r.quantity, a.cost, r.status
+       FROM Requests r
+       JOIN Assets a ON r.asset_id = a.id`
+    );
+
+    const totalAssets = assets.length;
+    const totalStockInCost = assets.reduce(
+      (sum, a) => sum + a.quantity * a.cost,
+      0
+    );
+    const totalApproved = requests.filter((r) =>
+      ["DeptApproved", "ManagerApproved", "Allocated", "Accepted"].includes(
+        r.status
+      )
+    ).length;
+    const totalPending = requests.filter((r) => r.status === "Pending").length;
+
+    const totalStockOutCost = requests
+      .filter((r) => r.status === "Allocated")
+      .reduce((sum, r) => sum + r.quantity * r.cost, 0);
+
+    // Stock balance = in - out
+    const balance = totalStockInCost - totalStockOutCost;
+
+    res.json({
+      totalAssets,
+      totalApproved,
+      totalPending,
+      totalStockInCost,
+      totalStockOutCost,
+      balance,
+    });
+  } catch (err) {
+    console.error("Enhanced Report Error:", err);
+    res.status(500).json({ error: "Failed to load enhanced report" });
+  }
+};

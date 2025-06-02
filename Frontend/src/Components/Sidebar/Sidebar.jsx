@@ -87,7 +87,7 @@ const Sidebar = ({ role, visible, overlaid }) => {
     },
     {
       to: "/dashboard/manager/post-announcement",
-      label: "Post Announcement",
+      label: "Announcement",
       icon: cilLibraryAdd, // You can choose another if needed
     },
   ];
