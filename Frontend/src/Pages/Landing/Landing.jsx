@@ -2,7 +2,7 @@ import React from "react";
 import "@coreui/coreui/dist/css/coreui.min.css";
 import Hero from "../../Components/Hero/Hero";
 import Announcements from "../../Components/Announcements/Announcements"; // Import Announcements
-import img from "../../assets/img/hero.png";
+import img from "../../assets/img/hero-two.jpg";
 
 const LandingPage = () => {
   return (
@@ -15,6 +15,7 @@ const LandingPage = () => {
         backgroundRepeat: "no-repeat",
         display: "flex",
         flexDirection: "column",
+        justifyContent: "center",
         color: "white",
         alignItems: "center",
         paddingTop: "50px",
