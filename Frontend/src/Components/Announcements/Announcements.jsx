@@ -1,15 +1,25 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Announcements = () => {
+  const [announcements, setAnnouncements] = useState([]);
   const [visible, setVisible] = useState(true);
+  const [error, setError] = useState("");
 
-  const announcements = [
-    "New office chairs added to inventory!",
-    "Laptops are now available for department allocation.",
-    "Reminder: Return unused assets before the semester ends.",
-  ];
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/announcements");
+        const data = await res.json();
+        setAnnouncements(data);
+      } catch (err) {
+        setError("Failed to load announcements.");
+      }
+    };
 
-  if (!visible) return null; // Do not render if not visible
+    fetchAnnouncements();
+  }, []);
+
+  if (!visible || announcements.length === 0) return null;
 
   return (
     <div
@@ -21,7 +31,8 @@ const Announcements = () => {
         margin: "20px auto",
         position: "relative",
         color: "white",
-        fontSize: "1.2em",
+        fontSize: "1.1em",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
       }}
     >
       <button
@@ -29,7 +40,7 @@ const Announcements = () => {
         style={{
           position: "absolute",
           top: "10px",
-          right: "10px",
+          right: "15px",
           background: "transparent",
           border: "none",
           color: "white",
@@ -39,12 +50,19 @@ const Announcements = () => {
       >
         &times;
       </button>
-      <h2 style={{ marginBottom: "-10px" }}>Latest Announcements</h2>
-      <hr style={{ color: "white", marginBottom: "10px", fontWeight: "900" }} />
-      <ul>
-        {announcements.map((announcement, index) => (
-          <li key={index} style={{ marginBottom: "10px" }}>
-            {announcement}
+      <h2 style={{ marginBottom: "10px", fontWeight: "bold" }}>
+        📢 Announcements
+      </h2>
+      <hr style={{ borderColor: "white", marginBottom: "15px" }} />
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <ul style={{ listStyleType: "circle", paddingLeft: "20px" }}>
+        {announcements.map((a) => (
+          <li key={a.id} style={{ marginBottom: "15px" }}>
+            <strong>{a.title}</strong> <br />
+            <span>{a.message}</span> <br />
+            <small style={{ fontSize: "0.8em", color: "#ccc" }}>
+              {new Date(a.created_at).toLocaleString()}
+            </small>
           </li>
         ))}
       </ul>

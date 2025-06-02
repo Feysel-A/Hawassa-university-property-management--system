@@ -21,5 +21,7 @@ app.use("/api/assets", assetRoutes);
 app.use("/api/requests", requestRoutes);
 // Report routes
 app.use("/api/reports", require("./routes/reportRoutes.js"));
+// Announcement routes
+app.use("/api/announcements", require("./routes/announcementRoutes.js"));
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

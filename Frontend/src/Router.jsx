@@ -24,6 +24,7 @@ import ManagerDashboard from "./Pages/Admin/Manager/Dashboard/ManagerDashboard";
 import RegisterAsset from "./Pages/Admin/Manager/AssetRegistration/AssetRegistration";
 import AvailableAssets from "./Pages/Admin/Manager/AvailableAssets/AvailableAssets";
 import ReportsPageForMn from "./Pages/Admin/Manager/ReportPage/ReportPage";
+import PostAnnouncement from "./Pages/Admin/Manager/PostAnnouncement/PostAnnouncement";
 
 // StoreMan pages
 import StoreManDashboard from "./Pages/Admin/StoreMan/StoreManDashboard/StoreManDashboard";
@@ -156,7 +157,14 @@ function Router() {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/dashboard/manager/post-announcement"
+          element={
+            <ProtectedRoute allowedRoles={["StockManager"]}>
+              <PostAnnouncement />
+            </ProtectedRoute>
+          }
+        />
         {/* ==== StoreMan Routes ==== */}
         <Route
           path="/dashboard/storeman"

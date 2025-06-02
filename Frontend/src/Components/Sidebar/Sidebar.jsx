@@ -85,6 +85,11 @@ const Sidebar = ({ role, visible, overlaid }) => {
       label: "Report",
       icon: cilLibrary,
     },
+    {
+      to: "/dashboard/manager/post-announcement",
+      label: "Post Announcement",
+      icon: cilLibraryAdd, // You can choose another if needed
+    },
   ];
 
   const adminLinks = [
