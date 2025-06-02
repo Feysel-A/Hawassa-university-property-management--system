@@ -11,7 +11,7 @@ import {
   CBadge,
 } from "@coreui/react";
 import { Bar } from "react-chartjs-2";
-import Sidebar from "../../../Components/Sidebar/Sidebar";
+import Sidebar from "../../../../Components/Sidebar/Sidebar";
 import "@coreui/coreui/dist/css/coreui.min.css";
 import {
   Chart as ChartJS,
@@ -80,7 +80,7 @@ const ReportsPage = () => {
 
   return (
     <div className="d-flex min-vh-100">
-      <Sidebar role="admin" />
+      <Sidebar role="manager" />
       <CContainer className="py-4 flex-grow-1">
         <CCard>
           <CCardHeader

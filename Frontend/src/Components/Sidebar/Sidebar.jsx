@@ -119,7 +119,10 @@ const Sidebar = ({ role, visible, overlaid }) => {
   else if (normalizedRole === "admin") links = adminLinks;
   else if (normalizedRole === "manager") links = managerLinks;
   else if (normalizedRole === "storeman") links = storemanLink;
-
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = "/login";
+  };
   return (
     <CSidebar
       narrow
@@ -175,6 +178,7 @@ const Sidebar = ({ role, visible, overlaid }) => {
               fontSize: "15px",
               transition: "background-color 0.2s ease",
             }}
+            onClick={handleLogout}
           >
             <CIcon icon={cilArrowRight} className="me-3" />
             Logout
